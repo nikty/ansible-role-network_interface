@@ -151,6 +151,7 @@ address obtained via DHCP.
               bond_mode: 802.3ad
               bond_miimon: 100
               bond_slaves: [eth1, eth2]
+              bond_ad_select: 2
 
 5) Configure a VLAN interface with the vlan tag 2 for an ethernet interface
 
