@@ -15,7 +15,7 @@ iface {{ item.device }} inet {% if item.bootproto is defined %}{{ item.bootproto
 {% endif %}
 {% if item.bond_mode == 2 or item.bond_mode == 'balance-xor'
    or item.bond_mode == 4 or item.bond_mode == '802.3ad'
-   or item.bond_mode == 6 or item.bond_mode == 'balance-tlb' 
+   or item.bond_mode == 6 or item.bond_mode == 'balance-tlb'
 %}
     bond-xmit-hash-policy  {{ item.bond_xmit_hash_policy | default('layer3+4') }}
 {% endif %}
@@ -27,7 +27,7 @@ iface {{ item.device }} inet {% if item.bootproto is defined %}{{ item.bootproto
     bond-updelay           {{ item.bond_updelay }}
 {% endif %}
 {% if item.bond_ad_select is defined %}
-    bond-ad-select         {{ item.bond_bond_ad_select }}
+    bond-ad-select         {{ item.bond_ad_select }}
 {% endif %}
 {% if item.bond_arp_interval is defined %}
     bond-arp-interval      {{ item.bond_arp_interval }}
@@ -81,4 +81,3 @@ iface {{ item.device }} inet6 static
 {% endfor %}
 {% endif %}
 {% endif %}
-
