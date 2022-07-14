@@ -1,0 +1,12 @@
+{% set ipv4_list = item.addresses | ipv4() %}
+
+{% for address in ipv4_list  %}
+IPADDR{{ loop.index0 }}={{ address | ipaddr('address') }}
+NETMASK{{ loop.index0 }}={{ address | ipaddr('netmask') }}
+{% endfor %}
+
+{% if item.gateway4 is defined and item.gateway4 != 'auto' %}
+GATEWAY={{ item.gateway4 }}
+{% elif item.gateway4 is defined and item.gateway4 == 'auto' or network_interface_auto_gateway %}
+GATEWAY={{ ipv4_list[0] | ipaddr('1') | ipaddr('address') }}
+{% endif %}

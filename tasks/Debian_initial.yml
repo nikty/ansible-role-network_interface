@@ -1,36 +1,32 @@
 ---
 - name: Install the required packages in Debian derivatives
   apt:
-    name: "{{ item }}"
+    name: "{{ network_pkgs }}"
     state: present
-  loop: "{{ network_pkgs }}"
   environment: "{{ env }}"
   when: network_check_packages
-
-- name: Make sure the include line is the only line in interfaces file
-  copy:
-    content: |
-      #
-      # Managed by ansible
-      #
-
-      source {{ net_path }}/*
+    
+- name: Template interfaces file
+  template:
+    src: Debian_interfaces.j2
     dest: /etc/network/interfaces
-  when: network_configured_interfaces_only
+  when: network_configured_interfaces_only | bool
   notify: restart networking
 
+  
 - name: Make sure the source include line is there in interfaces file
   lineinfile:
-    regexp: '^source\s{{ net_path | regex_escape() }}/\*'
+    regexp: '^source\s+{{ net_path | regex_escape() }}'
     line: "source {{ net_path }}/*"
     dest: /etc/network/interfaces
     state: present
     insertafter: EOF
   when: not network_configured_interfaces_only | bool
-
+  
+# 'source-directory' includes all files inside the directory, see "man 5 interfaces"
 - name: Make sure the source-directory include line is not there in interfaces file
   lineinfile:
-    regexp: '^source-directory\s{{ net_path | regex_escape() }}/?'
+    regexp: '^source-directory\s+{{ net_path | regex_escape() }}/?'
     dest: /etc/network/interfaces
     state: absent
   when: not network_configured_interfaces_only | bool

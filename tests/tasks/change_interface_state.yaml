@@ -1,0 +1,10 @@
+- name: Disable interface
+  command: "ifdown -v {{ interface }}"
+  when: state == 'down'
+  become: yes
+
+- name: Enable interface
+  command: "ifup -v {{ interface }}"
+  when: state == 'up'
+  become: yes
+

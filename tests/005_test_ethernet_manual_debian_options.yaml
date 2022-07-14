@@ -1,0 +1,118 @@
+---
+
+- hosts: all
+  vars:
+    test_iface_name: veth0
+    test_option_1: "post-up echo 'post-up first' > /tmp/opt1.txt || true"
+    test_option_2: |
+      post-up echo 'post-up second \
+      continued' > /tmp/opt2.txt || true
+    test_option_3: "post-down echo 'post-down third' > /tmp/opt3.txt || true"
+    test_option_4: "post-up false || true"
+
+  post_tasks:
+    - name: Clean temp files
+      become: yes
+      file:
+        path: "/tmp/opt{{ item }}.txt"
+        state: absent
+      loop: [ 1, 2, 3 ]
+
+  tasks:
+
+    - meta: end_play
+      when: ansible_distribution != "Debian"
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        type: veth
+        state: present
+      
+    - name: Test configuring static ipv4 with default gateway
+      import_role:
+        name: network_interface
+      become: yes
+      vars:
+        network_ether_interfaces:
+          - device: "{{ test_iface_name }}"
+            debian_command_options:
+              - "{{ test_option_1 }}"
+              - "{{ test_option_2 }}"
+              - "{{ test_option_3 }}"
+        network_restart_interfaces: false
+      when: ansible_distribution == "Debian"
+
+    # - name: Compare templated file
+    #   include_tasks: helpers/compare_lines.yaml
+    #   vars:
+    #     compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
+    #     compare_lines_to: |
+    #       auto veth0  
+    #       iface veth0 inet static
+    #       address {{ test_ip_address }}
+    #       gateway {{ test_ip_gateway4 }}
+    #       {% for opt in [ test_option_1, test_option_2, test_option_3 ] %}
+    #       {{ opt }}
+    #       {% endfor %}
+    #   when: ansible_distribution == "Debian"
+
+    - name: Start interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: up
+        
+    - name: Test interface is up
+      include_tasks: tasks/test_interface_state.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: up
+
+    - name: Test command options
+      command: cat /tmp/opt1.txt
+      register: p
+      failed_when: p.stdout != "post-up first"
+
+    - command: cat /tmp/opt2.txt
+      register: p
+      failed_when: p.stdout != "post-up second continued"
+      
+
+    - name: Stop interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: down
+
+    - name: Assert interface is down
+      include_tasks: tasks/test_interface_state.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: down
+
+    - name: Test post-down command option
+      command: cat /tmp/opt3.txt
+      register: p
+      failed_when: p.stdout != "post-down third"
+
+    - name: Test removing interface configuration
+      import_role:
+        name: network_interface
+      become: yes
+      vars:
+        network_ether_interfaces:
+          - device: "{{ test_iface_name }}"
+            present: no
+
+    - name: Test interface configuration is absent
+      include_tasks: tasks/test_interface_config_is_absent.yaml
+
+    - name: Remove test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        type: veth
+        state: absent
+      

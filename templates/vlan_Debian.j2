@@ -1,0 +1,6 @@
+{% set iface_name = item.link ~ "." ~ item.id %}
+auto {{ iface_name }}
+
+{% include "_debian_ipv4.j2" %}
+
+{% include "_debian_ipv6.j2" %}

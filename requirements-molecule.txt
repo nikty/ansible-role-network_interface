@@ -1,0 +1,5 @@
+Jinja2<3.1
+ansible==2.9.16
+molecule==3.5.2
+molecule_vagrant
+netaddr

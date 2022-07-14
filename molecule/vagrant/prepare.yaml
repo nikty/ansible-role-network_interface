@@ -1,0 +1,14 @@
+- hosts: all
+  tasks:
+    - command: dnf -y reinstall initscripts
+      when: ansible_os_family in ("RedHat", "AlmaLinux")
+      become: yes
+
+    - shell:
+        cmd: |
+          for i in $(seq 0 10); do
+          ip link add veth$i type veth peer p-veth$i 
+          ip link set p-veth$i up
+          done
+      become: yes
+      when: False

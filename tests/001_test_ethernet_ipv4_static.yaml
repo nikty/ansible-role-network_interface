@@ -1,0 +1,105 @@
+---
+# Test configuring ethernet interface with static IPv4
+
+- hosts: all
+  vars:
+    test_iface_name: veth0
+    test_ip_address: 192.0.2.2/24
+    test_ip_gateway4: 192.0.2.1
+
+  tasks:
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        type: veth
+        state: present
+      
+    - name: Test configuring static ipv4 with default gateway
+      import_role:
+        name: network_interface
+      become: yes
+      vars:
+        network_ether_interfaces:
+          - device: "{{ test_iface_name }}"
+            addresses:
+              - "{{ test_ip_address }}"
+            gateway4: "{{ test_ip_gateway4 }}"
+        network_restart_interfaces: false
+
+    - name: Remove default route
+      include_tasks: helpers/remove_restore_default_route.yaml
+      vars:
+        state: absent
+    
+    - name: Compare templated file
+      include_tasks: helpers/compare_lines.yaml
+      vars:
+        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
+        compare_lines_to: |
+          auto veth0  
+          iface veth0 inet static
+          address {{ test_ip_address }}
+          gateway {{ test_ip_gateway4 }}
+      when: ansible_distribution == "Debian"
+        
+    - name: Start interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: up
+        
+    - name: Test interface is up
+      include_tasks: tasks/test_interface_state.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: up
+
+    - name: Test interface has IP address
+      include_tasks: tasks/assert_interface_has_ip_address.yaml
+      vars:
+        addresses:
+          - "{{ test_ip_address }}"
+        iface: "{{ test_iface_name }}"
+
+    - name: Test gateway is set
+      command: "ip route ls"
+      register: p
+      failed_when: '("default via " ~ test_ip_gateway4) not in p.stdout'
+
+    - name: Stop interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: down
+
+    - name: Assert interface is down
+      include_tasks: tasks/test_interface_state.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: down
+
+    - name: Test removing interface configuration
+      import_role:
+        name: network_interface
+      become: yes
+      vars:
+        network_ether_interfaces:
+          - device: "{{ test_iface_name }}"
+            present: no
+
+    - name: Test interface configuration is absent
+      include_tasks: tasks/test_interface_config_is_absent.yaml
+
+    - name: Remove test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        type: veth
+        state: absent
+      
+    - name: Restore default route
+      include_tasks: helpers/remove_restore_default_route.yaml
+      vars:
+        state: present

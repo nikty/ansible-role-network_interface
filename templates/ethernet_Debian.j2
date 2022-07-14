@@ -1,26 +1,11 @@
+{% set iface_name = item.device %}
+auto {{ iface_name }}
 
-auto {{ item.device }}
-iface {{ item.device }} inet {% if item.bootproto is defined %}{{ item.bootproto }}{% elif item.cidr is defined or item.address is defined %}static{% else %}dhcp{% endif %}
+{% if (item.addresses is defined and item.addresses | ipv4)
+  or (item.debian_command_options is defined and not (item.addresses | default([]) | ipv6)) %}
+{% include "_debian_ipv4.j2" %}
+{% endif %}  
 
-{% include 'Debian_ipv4_config.j2' %}
-{% include 'Debian_resolvconf.j2' %}
-{% include 'route_Debian.j2' %}
-{% if item.hwaddress is defined %}
-    hwaddress ether        {{ item.hwaddress }}
+{%- if item.addresses is defined and item.addresses | ipv6 %}
+{% include "_debian_ipv6.j2" %}
 {% endif %}
-{% if item.options is defined %}
-{% for option in item.options %}
-    {{ option }}
-{% endfor %}
-{% endif %}
-
-{% if item.ipv6_address is defined %}
-iface {{ item.device }} inet6 static
-{% include 'Debian_ipv6_config.j2' %}
-{% if item.ipv6_options is defined %}
-{% for option in item.ipv6_options %}
-    {{ option }}
-{% endfor %}
-{% endif %}
-{% endif %}
-

@@ -1,0 +1,19 @@
+- hosts: all
+  vars:
+    test_iface_name: veth0
+    test_ip_address: 192.0.2.11/24
+  tasks:
+
+    - import_role:
+        name: network_interface
+      become: yes
+      vars:
+        network_ether_interfaces:
+          - device: "{{ test_iface_name }}"
+            addresses:
+              - "{{ test_ip_address }}"
+            gateway4: auto
+
+    - include_tasks: "roles/test_network_interfaces/tasks/test_ipv4_with_auto_gateway.yaml"
+
+  

@@ -1,0 +1,5 @@
+{% set iface_name = item.link ~ "." ~ item.id %}
+DEVICE={{ iface_name }}
+VLAN=yes
+
+{% include "_redhat_ip.j2" %}

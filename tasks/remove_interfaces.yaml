@@ -1,0 +1,6 @@
+- name: Remove interfaces
+  file:
+    path: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
+    state: absent
+  loop: "{{ network_ether_interfaces }}"
+  when: item.present is defined and not item.present

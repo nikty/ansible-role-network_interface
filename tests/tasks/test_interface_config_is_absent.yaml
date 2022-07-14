@@ -1,0 +1,6 @@
+- include_tasks: get_file_stat.yaml
+  vars:
+    file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
+- assert:
+    that: not get_file_stat.stat.exists
+    

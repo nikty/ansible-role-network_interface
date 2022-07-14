@@ -1,0 +1,28 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+# lint: |
+#   set -e
+#   yamllint .
+#   ansible-lint
+platforms:
+  - name: "network-interface-${TEST_PLATFORM_NAME:-instance}"
+    box: ${TEST_PLATFORM_BOX:-almalinux/8}
+    config_options:
+      synced_folder: false
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../../tests/test_role_with_default_parameters.yaml
+    #prepare: prepare.yaml
+    verify: ${TEST_VERIFY_PLAYBOOK:-verify.yml}
+    #verify: ../../tests/test_remove_interface_config.yaml
+  # inventory:
+  #   links:
+  #     host_vars: host_vars
+verifier:
+  name: ansible

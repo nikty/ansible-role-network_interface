@@ -13,6 +13,8 @@
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.1 }}{{ network_interface_file_postfix }}"
   with_subelements:
     - '{{ network_bridge_interfaces }}'
-    - bridge_ports
+    - interfaces
+  when:
+    - not ansible_os_family == "Debian"
   register: bridge_port_result
   notify: restart networking

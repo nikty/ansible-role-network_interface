@@ -8,17 +8,16 @@
 - name: Create a restart script
   template:
     src: restartscript.j2
-    dest: /etc/network/restart.sh
+    dest: /tmp/restart_interfaces.sh
     mode: 0755
 
 # Execute configuration change
 - name: Execute Network Restart
   shell: |
-    set -o pipefail
-    bash /etc/network/restart.sh
-  failed_when: false
+    sh /tmp/restart_interfaces.sh
+  ignore_errors: yes
 
 - name: Cleanup Network Restart script
   file:
-    path: /etc/network/restart.sh
+    path: /tmp/restart_interfaces.sh
     state: absent

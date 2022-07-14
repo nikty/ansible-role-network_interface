@@ -1,0 +1,13 @@
+# Task variables:
+# - interface: interface name to test
+# - state: 'down' or 'up'
+
+- name: Test interface is up
+  shell: ip link ls {{ interface }} | grep -q -i 'state up'
+  changed_when: no
+  when: state == 'up'
+
+- name: Test interfaces is down
+  shell: ip link ls {{ interface }} | grep -q -i 'state down'
+  changed_when: no
+  when: state == 'down'

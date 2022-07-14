@@ -5,9 +5,11 @@
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.1 }}{{ network_interface_file_postfix }}"
   with_subelements:
     - "{{ network_bond_interfaces }}"
-    - bond_slaves
+    - interfaces
   register: bond_port_result
   notify: restart networking
+  when: >-
+    not ansible_os_family == "Debian"
 
 - name: Create the network configuration file for bond devices
   template:
@@ -17,19 +19,19 @@
   register: bond_result
   notify: restart networking
 
-- name: Make sure the bonding module is loaded
-  modprobe:
-    name: bonding
-    state: present
-  when: bond_result is changed
-  notify: restart networking
+# - name: Make sure the bonding module is loaded
+#   modprobe:
+#     name: bonding
+#     state: present
+#   when: bond_result is changed
+#   notify: restart networking
 
-- name: Make the bonding module persistent
-  become: true
-  lineinfile:
-    line: 'bonding'
-    dest: /etc/modules
-    insertafter: EOF
-  when:
-    - network_modprobe_persist
-  notify: restart networking
+# - name: Make the bonding module persistent
+#   become: true
+#   lineinfile:
+#     line: 'bonding'
+#     dest: /etc/modules
+#     insertafter: EOF
+#   when:
+#     - network_modprobe_persist
+#   notify: restart networking

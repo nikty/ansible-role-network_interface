@@ -1,0 +1,40 @@
+- name: Save default route
+  shell:
+    cmd: |
+      [ -e /tmp/saved_routes ] && exit
+      ip route ls > /tmp/saved_routes
+      ip route del default
+  become: yes
+  when: state == 'absent'
+
+- name: Restore default route
+  shell:
+    cmd: |
+      [ -e /tmp/saved_routes ] || exit
+      grep "default via" /tmp/saved_routes |
+        while read p; do
+          ip route add $p
+        done
+      rm /tmp/saved_routes
+  become: yes
+  when: state == 'present'
+
+# - block:
+#     - name: Save default route
+#       command: "ip route ls"
+#       become: yes
+#       register: _result_save_default_route
+
+#     - set_fact:
+#         result_save_default_route: "{{ _result_save_default_route }}"
+        
+#     - name: Remove default route
+#       command: "ip route del default"
+#       become: yes
+#       when: "'default via' in result_save_default_route.stdout"
+#   when: state == 'absent'
+  
+# - name: Restore default route
+#   command: ip route add {{ result_save_default_route.stdout_lines | select('match', 'default via') | first }}
+#   become: yes
+#   when: state == 'present' and 'default via' in result_save_default_route.stdout

@@ -1,8 +1,20 @@
 ---
+
+- name: Add default lo interface
+  set_fact:
+    network_ether_interfaces: "{{ network_ether_interfaces + [ { 'device' : network_interface_loopback_name } ] }}"
+  when:
+    - "network_interface_loopback_name not in network_ether_interfaces | map(attribute='device')"
+    - ansible_os_family != "RedHat"
+    - False
+  
+  
 - name: Create the network configuration file for ethernet interfaces
   template:
     src: "ethernet_{{ ansible_os_family }}.j2"
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_ether_interfaces }}"
+  when: item.present | default(True)
   register: ether_result
   notify: restart networking
+

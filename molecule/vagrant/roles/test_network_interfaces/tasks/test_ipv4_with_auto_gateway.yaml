@@ -1,0 +1,33 @@
+# - name: Check interface IP address
+#   assert:
+#     that: ansible_facts[ test_iface_name ]['ipv4']['address'] == (test_ip_address | ipaddr('address'))
+
+- name: Compare templated file
+  include_tasks: "compare_lines.yaml"
+  vars:
+    compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
+    compare_lines_to: |
+      auto veth0  
+      iface veth0 inet static
+      address {{ test_ip_address }}
+      gateway {{ test_ip_address | ipaddr(1) | ipaddr('address') }} 
+  when: ansible_distribution == "Debian"
+
+# - debug:
+#     msg: "{{ ifcfg_veth0.content | b64decode | regex_replace('^\\s*\\n$', '' }}"
+# # - name: Copy file to compare to
+# #   copy:
+# #     content: |
+# #       DEVICE=veth0
+# #       BOOTPROTO=none
+# #       ONBOOT=yes
+# #       IPADDR0=192.168.10.2
+# #       NETMASK0=255.255.255.0
+# #       GATEWAY=192.168.10.1
+# #     dest: /tmp/tmpfile.txt
+
+
+# - name: diff files
+#   command: diff -Bb /etc/sysconfig/network-scripts/ifcfg-veth0 /tmp/tmpfile.txt
+
+

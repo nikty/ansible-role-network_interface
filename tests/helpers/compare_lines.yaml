@@ -1,0 +1,62 @@
+# task_variables:
+# - compare_lines_from: string
+# - compare_lines_from_file: path to remote file
+# - compare_lines_to: string
+# - compare_lines_to_file: path to remote file
+# - compare_lines_ignore_blank_lines: boolean - whether blank lines matter
+# - compare_lines_trim_whitespace: boolean - ignore whitespace at the beginning and ending of lines
+
+- set_fact:
+    _compare_lines_from: "{{ compare_lines_from }}"
+  when: compare_lines_from_file is not defined
+
+- name: Slurp `from` file
+  block:
+    - slurp:
+        src: "{{ compare_lines_from_file }}"
+      register: _compare_lines_slurp
+      
+    - set_fact:
+        _compare_lines_from: "{{ _compare_lines_slurp.content | b64decode }}"
+
+  when: compare_lines_from_file is defined
+
+- set_fact:
+    _compare_lines_to: "{{ compare_lines_to }}"
+  when: compare_lines_to_file is not defined
+
+- name: Slurp `to` file
+  block:
+    - slurp:
+        src: "{{ compare_lines_to_file }}"
+      register: _compare_lines_slurp
+      
+    - set_fact:
+        _compare_lines_from: "{{ _compare_lines_slurp.content | b64decode }}"
+
+  when: compare_lines_to_file is defined
+        
+- set_fact:
+    _compare_lines_from: "{{ _compare_lines_from.split('\n') | select() | join('\n') }}"
+  when: compare_lines_ignore_blank_lines | default(True) | bool
+
+- set_fact:
+    _compare_lines_to: "{{ _compare_lines_to.split('\n') | select() | join('\n') }}"
+  when: compare_lines_ignore_blank_lines | default(True) | bool
+
+- set_fact:
+    _compare_lines_from: "{{ _compare_lines_from.split('\n') | map('trim') | join('\n') }}"
+  when: compare_lines_trim_whitespace | default(True) | bool
+
+- set_fact:
+    _compare_lines_to: "{{ _compare_lines_to.split('\n') | map('trim') | join('\n') }}"
+  when: compare_lines_trim_whitespace | default(True) | bool
+  
+- debug:
+    var: "{{ item }}"
+  loop:
+    - _compare_lines_from
+    - _compare_lines_to
+    
+- assert:
+    that: _compare_lines_from == _compare_lines_to

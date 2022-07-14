@@ -1,0 +1,6 @@
+network_configured_interfaces_only: false
+network_ether_interfaces:
+  - device: veth0
+    addresses:
+      - 192.168.10.2/24
+    gateway4: auto

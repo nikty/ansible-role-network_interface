@@ -1,19 +1,33 @@
 ---
+- name: "HACK: change `ansible_os_family` for AlmaLinux"
+  set_fact:
+    ansible_os_family: "RedHat"
+  when: ansible_os_family == "AlmaLinux"
+
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
 
-- name: Define network_pkgs.
-  set_fact:
-    network_pkgs: "{{ _network_pkgs }}"
-  when: network_pkgs is not defined
+# - name: Define network_pkgs.
+#   set_fact:
+#     network_pkgs: "{{ _network_pkgs }}"
+#   when: network_pkgs is not defined
 
 - name: Include specific tasks for the OS family
   include_tasks: "{{ ansible_os_family }}_initial.yml"
 
 - name: Cleanup interfaces configuration
   import_tasks: "clean_interfaces.yml"
-  when: network_configured_interfaces_only
+  when: network_configured_interfaces_only | bool
 
+- name: Remove interfaces
+  include_tasks: "remove_interfaces.yaml"
+  
+# - name: Configure /etc/resolv.conf
+#   import_tasks: "etc_resolv_conf.yaml"
+#   when:
+#     - ansible_os_family == "Debian"
+#     - "resolvconf is not installed"
+  
 - name: Configure Ethernet interfaces
   import_tasks: "ether_interfaces.yml"
   when: network_ether_interfaces | length > 0

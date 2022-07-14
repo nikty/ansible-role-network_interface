@@ -7,6 +7,21 @@ network_vlan_interfaces: []
 network_check_packages: true
 network_allow_service_restart: true
 network_modprobe_persist: true
+
+# Remove all other settings in interfaces(5) file
 network_configured_interfaces_only: false
+#network_remove_unmanaged_interfaces: false
+
 network_interface_file_prefix: "ifcfg-"
 network_interface_file_postfix: ""
+
+network_interface_expand_cidr: false
+network_interface_auto_gateway: false
+
+network_interface_assume_dhcp: false
+
+network_interface_loopback_name: lo
+
+# network_interface_bond_options:
+
+network_restart_interfaces: true

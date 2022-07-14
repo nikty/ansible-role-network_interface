@@ -1,0 +1,54 @@
+{% if item.addresses is defined and item.addresses | ipv4 %}
+  {% set method = 'static' %}
+{% elif (item.dhcp4 is defined and item.dhcp4) or network_interface_assume_dhcp %}
+  {% set method = 'dhcp' %}
+{% elif iface_name == network_interface_loopback_name %}
+  {% set method = 'loopback' %}
+{% else %}
+  {% set method = 'manual' %}
+{% endif %}
+
+BOOTPROTO={{ (method == 'dhcp') | ternary('dhcp', 'none') }}
+ONBOOT=yes
+
+{% if item.addresses is defined %}
+{% include "RedHat_ipv4_config.j2" %}
+{% endif %}
+
+{% for ns in item.nameservers.addresses | default([]) %}
+DNS{{ loop.index }}={{ ns }}
+{% endfor %}
+{% if item.nameservers.search is defined %}
+SEARCH="{{ item.nameservers.search | join(' ') }}"
+{% endif %}
+
+{% if item.macaddress is defined %}
+MACADDR={{ item.macaddress }}
+{% endif -%}
+
+
+{% set configure_ipv6 = False %}
+{% if item.addresses is defined and item.addresses | ipv6 %}
+  {% set configure_ipv6 = True %}
+  {% set method_ipv6 = 'static' %}
+{% endif %}
+
+{% if configure_ipv6 %}
+IPV6INIT="yes"
+
+{% set ipv6_list = item.addresses | ipv6 %}
+IPV6ADDR={{ ipv6_list[0] }}
+IPV6ADDR_SECONDARIES={{ ipv6_list[1:] | join(' ') }}
+
+{% if item.gateway6 is defined and item.gateway6 != 'auto' %}
+IPV6_DEFAULTGW={{ item.gateway6 }}
+{% elif item.gateway6 is defined and item.gateway6 == 'auto' or network_interface_auto_gateway %}
+IPV6_DEFAULTGW={{ ipv6_list[0] | ipaddr('1') | ipaddr('address') }}
+{% endif %}
+
+# IPV6FORWARDING="yes"
+# IPV6_AUTOCONF
+# IPV6_PEERDNS="yes" (?)
+# IPV6_PRIVACY="no" (?)
+{% endif %}
+

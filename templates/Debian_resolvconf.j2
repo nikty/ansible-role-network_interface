@@ -1,10 +1,7 @@
-{% if item.dns_nameservers is defined %}
-    dns-nameservers        {{ item.dns_nameservers|join(' ') }}
+{% if item.nameservers.addresses is defined %}
+    dns-nameservers        {{ item.nameservers.addresses | join(' ') }}
 {% endif %}
-{% if item.dns_search is defined %}
-    dns-search             {{ item.dns_search }}
-{% endif %}
-{% if item.dns_domain is defined %}
-    dns-domain             {{ item.dns_domain }}
+{% if item.nameservers.search is defined %}
+    dns-search             {{ item.nameservers.search | join(' ') }}
 {% endif %}
 

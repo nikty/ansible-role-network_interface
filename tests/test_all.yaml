@@ -1,0 +1,4 @@
+- import_playbook: 001_test_ethernet_ipv4_static.yaml
+- import_playbook: 002_test_ethernet_ipv4_auto_gateway.yaml
+- import_playbook: 003_test_ethernet_ipv4_static_multiple_addresses.yaml
+- import_playbook: 004_test_ethernet_ipv4_static_with_options.yaml

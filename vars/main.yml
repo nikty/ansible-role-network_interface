@@ -1,4 +1,7 @@
 ---
+
+# init-system-helpers: /usr/share/doc/init-system-helpers/README.policy-rc.d.gz
+# RUNLEVEL=1 prevents autostarting services after installation
 env:
   RUNLEVEL: 1
 

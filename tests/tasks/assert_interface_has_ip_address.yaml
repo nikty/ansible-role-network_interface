@@ -1,0 +1,9 @@
+- shell: ip address ls dev "{{ iface }}"
+  register: result_ip_address_ls
+    
+- debug: var=result_ip_address_ls
+
+- assert:
+    that: >-
+      "{{ item }}" in result_ip_address_ls.stdout
+  loop: "{{ addresses }}"

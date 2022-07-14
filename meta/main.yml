@@ -2,39 +2,42 @@
 galaxy_info:
   description: This roles enables users to configure various network components on target machines.
   role_name: network_interface
-  author: "Benno Joy, Martin Verges, Luke Short, Eric Anderson"
-  company: "AnsibleWorks, First Colo GmbH"
+  namespace: nikty
+  author: "Benno Joy, Martin Verges, Luke Short, Eric Anderson, nikty"
   license: BSD-2-Clause
   min_ansible_version: 1.9
   platforms:
     - name: Debian
       versions:
-        - wheezy
-        - jessie
-        - stretch
+        # - wheezy
+        # - jessie
+        # - stretch
         - buster
-    - name: Ubuntu
+    # - name: Ubuntu
+    #   versions:
+    #     - precise
+    #     - quantal
+    #     - raring
+    #     - saucy
+    #     - trusty
+    #     - utopic
+    #     - vivid
+    #     - wily
+    #     - xenial
+    #     - yakkety
+    #     - zesty
+    #     - artful
+    #     - bionic
+    #     - cosmic
+    #     - disco
+    #     - eoan
+    #     - focal
+    - name: CentOS
       versions:
-        - precise
-        - quantal
-        - raring
-        - saucy
-        - trusty
-        - utopic
-        - vivid
-        - wily
-        - xenial
-        - yakkety
-        - zesty
-        - artful
-        - bionic
-        - cosmic
-        - disco
-        - eoan
-        - focal
-    - name: EL
-      versions:
-        - 7
+        - 8
+    # - name: EL
+    #   versions:
+    #     - 7
   galaxy_tags:
     - networking
     - system
