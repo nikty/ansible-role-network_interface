@@ -2,7 +2,8 @@
 auto {{ iface_name }}
 
 {% if (item.addresses is defined and item.addresses | ipv4)
-  or (item.debian_command_options is defined and not (item.addresses | default([]) | ipv6)) %}
+  or (item.debian_command_options is defined and not (item.addresses | default([]) | ipv6))
+  or (item.dhcp4 is defined and item.dhcp4) %}
 {% include "_debian_ipv4.j2" %}
 {% endif %}  
 
