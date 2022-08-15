@@ -84,6 +84,11 @@
         interface: "{{ test_iface_name }}"
         state: down
 
+    - name: Restore default route
+      include_tasks: helpers/remove_restore_default_route.yaml
+      vars:
+        state: present
+
     - name: Test removing interface configuration
       import_role:
         name: network_interface
@@ -103,8 +108,8 @@
         type: veth
         state: absent
       
-    - name: Restore default route
-      include_tasks: helpers/remove_restore_default_route.yaml
-      vars:
-        state: present
+    # - name: Restore default route
+    #   include_tasks: helpers/remove_restore_default_route.yaml
+    #   vars:
+    #     state: present
 
