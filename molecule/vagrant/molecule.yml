@@ -10,15 +10,15 @@ driver:
 #   yamllint .
 #   ansible-lint
 platforms:
-  - name: "network-interface-${TEST_PLATFORM_NAME:-instance}"
-    box: ${TEST_PLATFORM_BOX:-almalinux/8}
+  - name: "test-ansible-role-network-interface"
+    box: ${TEST_PLATFORM_BOX:-debian/buster64}
     config_options:
       synced_folder: false
 provisioner:
   name: ansible
   playbooks:
     converge: ../../tests/test_role_with_default_parameters.yaml
-    #prepare: prepare.yaml
+    #verify: "{{ '$TEST_VERIFY_PLAYBOOK' == '' | ternary('verify.yaml', '$TEST_VERIFY_PLAYBOOK' }}"
     verify: ${TEST_VERIFY_PLAYBOOK:-verify.yml}
     #verify: ../../tests/test_remove_interface_config.yaml
   # inventory:

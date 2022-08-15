@@ -6,7 +6,7 @@
   when:
     - "network_interface_loopback_name not in network_ether_interfaces | map(attribute='device')"
     - ansible_os_family != "RedHat"
-    - False
+    - False # disabled - TODO
   
   
 - name: Create the network configuration file for ethernet interfaces

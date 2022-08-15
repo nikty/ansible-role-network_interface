@@ -19,6 +19,8 @@
   import_tasks: "clean_interfaces.yml"
   when: network_configured_interfaces_only | bool
 
+
+# Remove config files for interfaces with key "present: no"
 - name: Remove interfaces
   include_tasks: "remove_interfaces.yaml"
   

@@ -1,0 +1,51 @@
+- hosts: all
+  become: yes
+  vars:
+    test_iface_name: lo
+  tasks:
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
+      
+
+    # import_role instead of include_role
+    # to make role's variables available in this test
+    - import_role:
+        name: network_interface
+      vars:
+        network_ether_interfaces:
+          - device: lo
+
+          # eth0 is management interface for vagrant
+          - device: eth0
+            dhcp4: yes
+            
+        network_configured_interfaces_only: yes
+        network_restart_interfaces: false
+
+    - name: Compare templated file
+      include_tasks: helpers/compare_lines.yaml
+      vars:
+        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
+        compare_lines_to: |
+          auto {{ test_iface_name }}
+          iface {{ test_iface_name }} inet loopback
+      when: ansible_os_family == "Debian"
+
+    - name: Restart interface
+      block:
+        - include_tasks: tasks/system_interface_control.yaml
+          vars:
+            interface: "{{ test_iface_name }}"
+            state: restart
+
+        # - include_tasks: tasks/system_interface_control.yaml
+        #   vars:
+        #     interface: "{{ test_iface_name }}"
+        #     state: up
+
+        
+    # - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+    #   vars:
+    #     action: restore
