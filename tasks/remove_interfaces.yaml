@@ -2,5 +2,7 @@
   file:
     path: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
     state: absent
-  loop: "{{ network_ether_interfaces }}"
+  loop: >
+    {{ network_ether_interfaces
+       + network_vlan_interfaces }}
   when: item.present is defined and not item.present

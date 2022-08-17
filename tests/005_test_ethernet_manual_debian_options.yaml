@@ -20,6 +20,9 @@
 
   tasks:
 
+    - name: "Running test [005]"
+      debug: msg="[005]"
+
     - meta: end_play
       when: ansible_distribution != "Debian"
 

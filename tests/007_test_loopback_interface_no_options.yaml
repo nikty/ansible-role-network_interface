@@ -4,11 +4,13 @@
     test_iface_name: lo
   tasks:
 
+    - name: "Running test [007]"
+      debug: msg="[007]"
+
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
         action: backup
       
-
     # import_role instead of include_role
     # to make role's variables available in this test
     - import_role:
@@ -16,11 +18,6 @@
       vars:
         network_ether_interfaces:
           - device: lo
-
-          # eth0 is management interface for vagrant
-          - device: eth0
-            dhcp4: yes
-            
         network_configured_interfaces_only: yes
         network_restart_interfaces: false
 
@@ -33,19 +30,35 @@
           iface {{ test_iface_name }} inet loopback
       when: ansible_os_family == "Debian"
 
-    - name: Restart interface
-      block:
-        - include_tasks: tasks/system_interface_control.yaml
-          vars:
-            interface: "{{ test_iface_name }}"
-            state: restart
-
-        # - include_tasks: tasks/system_interface_control.yaml
-        #   vars:
-        #     interface: "{{ test_iface_name }}"
-        #     state: up
-
+    - include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: restart
         
-    # - include_tasks: helpers/backup_and_restore_original_network_config.yaml
-    #   vars:
-    #     action: restore
+    - name: Stop interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: down
+        
+    - name: Test removing interface configuration
+      import_role:
+        name: network_interface
+      become: yes
+      vars:
+        network_ether_interfaces:
+          - device: "{{ test_iface_name }}"
+            present: no
+
+    - name: Test interface configuration is absent
+      include_tasks: tasks/test_interface_config_is_absent.yaml
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore
+
+    - name: Enable original lo interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: lo
+        state: up

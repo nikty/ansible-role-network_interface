@@ -1,0 +1,58 @@
+- hosts: all
+  become: yes
+  vars:
+    test_vlan_name: vlan_foo
+    test_vlan_link: veth0
+    test_vlan_id: 10
+    test_iface_name: vlan_foo
+    test_address_1: 192.0.2.1/24
+  tasks:
+
+    - name: "Running test [021]"
+      debug: msg="[021]"
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: "{{ test_vlan_link }}"
+        type: veth
+        state: present
+
+    # import_role instead of include_role
+    # to make role's variables available in this test
+    - import_role:
+        name: network_interface
+      vars:
+        network_vlan_interfaces:
+          - device: "{{ test_vlan_name }}"
+            addresses:
+              - "{{ test_address_1 }}"
+            link: "{{ test_vlan_link }}"
+            id: "{{ test_vlan_id }}"
+        network_restart_interfaces: false
+
+    - name: Compare templated file
+      include_tasks: helpers/compare_lines.yaml
+      vars:
+        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
+        compare_lines_to: |
+          auto {{ test_iface_name }}
+          iface {{ test_iface_name }} inet static
+          address {{ test_address_1 }}
+      when: ansible_os_family == "Debian"
+
+    - name: Start interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: up
+
+    - name: Test interface has IP address
+      include_tasks: tasks/assert_interface_has_ip_address.yaml
+      vars:
+        addresses:
+          - "{{ test_address_1 }}"
+        iface: "{{ test_iface_name }}"
+
+    - include_tasks: tasks/test_stop_interface_and_remove_config.yaml
+

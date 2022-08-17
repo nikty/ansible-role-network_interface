@@ -18,6 +18,7 @@ network_interface_file_postfix: ""
 network_interface_expand_cidr: false
 network_interface_auto_gateway: false
 
+# If we can't decide on interface's config, assume DHCP.
 network_interface_assume_dhcp: false
 
 network_interface_loopback_name: lo

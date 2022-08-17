@@ -11,6 +11,9 @@
 
   tasks:
 
+    - name: "Running test [003]"
+      debug: msg="[003]"
+
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml
       vars:

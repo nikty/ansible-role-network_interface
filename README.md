@@ -42,9 +42,47 @@ them are as follows:
 
 Note: The values for the list are listed in the examples below.
 
+### Ethernets
+```
+network_ether_interfaces:
+  # Static IPv4 and IPv6
+  - device: eth0
+    addresses:
+      - 192.0.2.2/24
+      - 192.0.2.3/24
+      - 2001:db8::2/64
+    gateway4: 192.0.2.1 # set to "auto" to configure first address in subnet as gateway
+    gateway6: 2001:db8::1
+    debian_command_options:
+      - "up /execute/this"
+      - "down /execute/that"
+    debian_command_options_ipv6: # TODO: do we need this?
+      - "up /execute/this"
+    _debian_ipv4_method: static # Force method: manual | loopback | dhcp | etc...
+    
+  # DHCPv4
+  - device: eth1
+    dhcpv4: yes
+
+  # Remove device configuration (TODO: shutdown interface before removing config files)
+  - device: eth1000
+    present: no 
+```
+
+### VLANs
+```
+network_vlan_interfaces:
+  - device: eth0.10 # TODO: can't have arbitrary name
+    link: eth1 # TODO: currently not used
+    id: 10 # TODO: currently not used
+```
+
 ## Examples
 
-Debian (not RedHat) network configurations can optionally use CIDR notation for IPv4 addresses instead of specifying the address and subnet mask separately. It is required to use CIDR notation for IPv6 addresses on Debian.
+Debian (not RedHat) network configurations can optionally use CIDR
+notation for IPv4 addresses instead of specifying the address and
+subnet mask separately. It is required to use CIDR notation for IPv6
+addresses on Debian.
 
 IPv4 example with CIDR notation:
 ```

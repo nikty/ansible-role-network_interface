@@ -1,16 +1,3 @@
-{% if method is not defined %}
-{% if item.addresses is defined and item.addresses | ipv4 %}
-  {% set method = 'static' %}
-{% elif (item.dhcp4 is defined and item.dhcp4) or network_interface_assume_dhcp %}
-  {% set method = 'dhcp' %}
-{# {% elif iface_name == network_interface_loopback_name %} #}
-{#   {% set method = 'loopback' %} #}
-{% else %}
-  {% set method = 'manual' %}
-{% endif %}
-{% endif %}
-iface {{ iface_name }} inet {{ method }}
-
 {% if item.addresses is defined and item.addresses | ipv4 %}
 {% set ipv4_list = item.addresses | ipv4() %}
 

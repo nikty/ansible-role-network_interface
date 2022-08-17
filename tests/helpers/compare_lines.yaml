@@ -37,11 +37,11 @@
   when: compare_lines_to_file is defined
         
 - set_fact:
-    _compare_lines_from: "{{ _compare_lines_from.split('\n') | select() | join('\n') }}"
+    _compare_lines_from: "{{ _compare_lines_from.split('\n') | map('regex_replace', '^\\s*$', '') | select() | join('\n') }}"
   when: compare_lines_ignore_blank_lines | default(True) | bool
 
 - set_fact:
-    _compare_lines_to: "{{ _compare_lines_to.split('\n') | select() | join('\n') }}"
+    _compare_lines_to: "{{ _compare_lines_to.split('\n') | map('regex_replace', '^\\s*$', '') | select() | join('\n') }}"
   when: compare_lines_ignore_blank_lines | default(True) | bool
 
 - set_fact:

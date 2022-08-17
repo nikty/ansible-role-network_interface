@@ -2,3 +2,7 @@
 - import_playbook: 002_test_ethernet_ipv4_auto_gateway.yaml
 - import_playbook: 003_test_ethernet_ipv4_static_multiple_addresses.yaml
 - import_playbook: 004_test_ethernet_ipv4_static_with_options.yaml
+- import_playbook: 005_test_ethernet_manual_debian_options.yaml
+- import_playbook: 006_test_ethernet_ipv6_static.yaml
+- import_playbook: 007_test_loopback_interface_no_options.yaml
+- import_playbook: 008_test_loopback_interface_ipv4_static.yaml

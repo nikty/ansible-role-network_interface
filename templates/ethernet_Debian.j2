@@ -1,11 +1,34 @@
 {% set iface_name = item.device %}
 auto {{ iface_name }}
+{% if iface_name == network_interface_loopback_name %}
+iface {{ iface_name }} inet loopback
+{% endif %}
 
-{% if (item.addresses is defined and item.addresses | ipv4)
-  or (item.debian_command_options is defined and not (item.addresses | default([]) | ipv6))
-  or (item.dhcp4 is defined and item.dhcp4) %}
-{% include "_debian_ipv4.j2" %}
-{% endif %}  
+{#### IPv4 ####}
+{% if item._debian_ipv4_method is defined %}
+  {% set method = item._debian_ipv4_method %}
+{% endif %}
+
+{# Guess method based on options - preferred way of setting method #}
+{% if method is not defined %}
+{% if item.addresses is defined and item.addresses | ipv4 %}
+  {% set method = 'static' %}
+{% elif item.dhcp4 is defined and item.dhcp4 %}
+  {% set method = 'dhcp' %}
+{% elif item.debian_command_options is defined and item.debian_command_options %} 
+  {% set method = 'manual' %} 
+{% endif %}
+{% endif %}
+{% if method is not defined %}
+  {% if network_interface_assume_dhcp %}
+    {% set method = 'dhcp' %}
+  {% endif %}
+{% endif %}
+
+{% if method is defined %}
+iface {{ iface_name }} inet {{ method }}
+{% include "_debian_ipv4.j2" %}  
+{% endif %}
 
 {%- if item.addresses is defined and item.addresses | ipv6 %}
 {% include "_debian_ipv6.j2" %}
