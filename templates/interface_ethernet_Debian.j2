@@ -1,0 +1,12 @@
+{# {% from "interface_Debian_macros.j2" import def_iface with context %} #}
+
+{% extends "interface_Debian_macros.j2" %}
+{% block content %}
+{{ item._debian_iface_selection | default('auto') }} {{ item.device }}
+
+---ipv4---
+{{ def_iface('inet', item) }}
+
+---ipv6---
+{{ def_iface('inet6', item) }}  
+{% endblock %}

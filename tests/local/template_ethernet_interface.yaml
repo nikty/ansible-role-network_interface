@@ -1,0 +1,60 @@
+- hosts: localhost
+  vars:
+    network_ether_interfaces:
+      - device: eth0
+        addresses:
+          - 192.0.2.1/24
+      - device: eth1
+        debian_command_options:
+          - up foo
+          - down bar
+        addresses:
+          - 2001:db8::1/64
+
+    network_bond_interfaces:
+      - device: bond0
+        interfaces:
+          - eth0
+          - eth1
+        parameters:
+          mode: 802.3ad
+      - device: bond1
+        interfaces:
+          - eth0
+          - eth1
+        parameters:
+          mode: 802.3ad
+        addresses:
+          - 2001:db8::1/64
+            
+        
+          
+    # network_interface_expand_cidr: false
+    # network_interface_auto_gateway: false
+  tasks:
+
+    - template:
+        src: ../../templates/interface_ethernet_Debian.j2
+        dest: interface_ethernet_debian.txt
+      vars:
+        item: "{{ network_ether_interfaces[0] }}"
+
+    - template:
+        src: ../../templates/interface_ethernet_Debian.j2
+        dest: interface_ethernet_debian_command_opts.txt
+      vars:
+        item: "{{ network_ether_interfaces[1] }}"
+
+    - template:
+        src: ../../templates/interface_bond_Debian.j2
+        dest: interface_bond_Debian_static_ipv4.txt
+      vars:
+        item: "{{ network_bond_interfaces[0] }}"
+
+    - template:
+        src: ../../templates/interface_bond_Debian.j2
+        dest: interface_bond_Debian_static_ipv6.txt
+      vars:
+        item: "{{ network_bond_interfaces[1] }}"
+
+        

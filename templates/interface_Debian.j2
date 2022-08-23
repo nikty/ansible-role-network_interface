@@ -1,13 +1,3 @@
-{% if item.address is defined %}
-  {% set method = 'static' %}
-{% elif (item.dhcp4 is defined and item.dhcp4) or network_interface_assume_dhcp %}
-  {% set method = 'dhcp' %}
-{% elif item.device == network_interface_loopback_name %}
-  {% set method = 'loopback' %}
-{% else %}
-  {% set method = 'manual' %}
-{% endif %}
-
 {% block iface_select %}auto{% endblock %} {% block iface_name %}{% endblock %}
 
 iface {{ self.iface_name() }} {% block family %}inet{% endblock %} {%block method %}{% endblock %}

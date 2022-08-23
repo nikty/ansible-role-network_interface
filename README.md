@@ -59,6 +59,19 @@ network_ether_interfaces:
     debian_command_options_ipv6: # TODO: do we need this?
       - "up /execute/this"
     _debian_ipv4_method: static # Force method: manual | loopback | dhcp | etc...
+    _debian_iface_selection: auto # allow-hotplug , etc...
+  - device: eth1
+    _debian_verbatim:
+      - family: inet
+        method: static
+	options:
+	 - "up /foo/bar"
+	address: 1.2.3.4/5
+      - |
+        iface eth1 inet manual
+	  post-up /foo/bar
+
+
     
   # DHCPv4
   - device: eth1
@@ -75,6 +88,18 @@ network_vlan_interfaces:
   - device: eth0.10 # TODO: can't have arbitrary name
     link: eth1 # TODO: currently not used
     id: 10 # TODO: currently not used
+```
+
+### Bonds
+```
+network_bond_interfaces
+  - device: bond0
+    interfaces:
+      - eth0
+      - eth1
+    parameters:
+      mode: 802.3ad
+      mii-monitor-interval: 1
 ```
 
 ## Examples

@@ -1,0 +1,38 @@
+- hosts: localhost
+  vars:
+    network_bond_interfaces:
+      - device: bond0
+        interfaces:
+          - eth0
+          - eth1
+        parameters:
+          mode: 802.3ad
+          mii-monitor-interval: 1
+        addresses:
+          - 1.2.3.4
+    network_interface_expand_cidr: false
+    network_interface_auto_gateway: false
+  tasks:
+
+    - template:
+        src: ../../templates/interface_bond_Debian.j2
+        dest: /tmp/interface_bond_Debian.txt
+      vars:
+        item: "{{ network_bond_interfaces[0] }}"
+        ipv4_address: "{{ item.addresses is defined }}"
+        ipv6_address: "{{ item.addresses | ipv6 }}"
+      tags:
+        - macro
+
+    - template:
+        src: ../../templates/interface_Debian_bond.j2
+        dest: /tmp/interface_Debian_bond.txt
+      vars:
+        item: "{{ network_bond_interfaces[0] }}"
+
+      tags:
+        - inherit
+
+    - debug: var=foo
+      tags: [ macro ]
+

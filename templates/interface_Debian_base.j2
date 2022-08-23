@@ -1,0 +1,17 @@
+{% block iface_select %}auto{% endblock %} {% block iface_name %}{% endblock %}
+
+{% macro macro_returns_false() %}
+{{ False }}
+{% endmacro %}
+
+={{ macro_returns_false() }}=
+
+{% if macro_returns_false() %}
+  Macro returned False
+{% endif %}
+
+{% block family_inet %}
+{% endblock %}
+
+{% block family_inet6 %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "interface_Debian_macros.j2" %}
+{% block content %}
+{{ item._debian_iface_selection | default('auto') }} {{ item.device }}
+
+---ipv4---
+{{ def_iface('bond', 'inet', item) }}
+
+---ipv6---
+{{ def_iface('bond', 'inet6', item) }}  
+{% endblock %}
+
+
+
+
+
+{#
+If you're not happy with config this role generates,
+you can write in ifupdown syntax
+and it will be rendered verbatim:
+
+{% for i in item._debian_verbatim | default( [] ) %}
+{{ i }}
+{% endfor %}  
+#}

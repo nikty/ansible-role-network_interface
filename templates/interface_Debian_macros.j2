@@ -1,0 +1,99 @@
+{% macro macro_iface_selection(iface_name, stanza='auto') %}
+{{ stanza }} {{ iface_name }}
+{% endmacro %}
+
+
+{% macro def_iface(type, family, item) %}
+  {% if family == 'inet' %}
+    {% if item.addresses is defined and item.addresses | ipv4 %}
+      {% set method = 'static' %}
+    {% elif item.dhcp4 is defined and item.dhcp4 %}
+      {% set method = 'dhcp' %}
+    {% elif (item.debian_command_options is defined and item.debian_command_options and debian_command_options == 'inet')
+      or (type == 'bond' and bond_in == 'inet') %}
+      {% set method = 'manual' %}
+    {% endif %}
+
+    {% if method is defined %}
+      iface {{ item.device }} {{ family }} {{ method }}
+
+      {% if debian_command_options == family %}
+	{% for opt in item.debian_command_options | default([]) %}
+	  {{ opt }}
+	{% endfor %}
+      {% endif %}
+
+      {% if type == 'bond' %}
+	{% include "_debian_bond.j2" %}
+      {% endif %}
+
+    {% endif %}
+  {% endif %}
+
+  {% if family == 'inet6' %}
+    {% if item.addresses is defined and item.addresses | ipv4 %}
+      {% set method = 'static' %}
+    {% elif (item.debian_command_options is defined and item.debian_command_options and debian_command_options == 'inet6')
+      or (type == 'bond' and bond_in == family ) %}
+      {% set method = 'manual' %}
+    {% endif %}
+
+    {% if method is defined %}
+      iface {{ item.device }} {{ family }} {{ method }}
+      {% if debian_command_options == family %}
+	{% for opt in item.debian_command_options | default([]) %}
+	  {{ opt }}
+	{% endfor %}
+      {% endif %}
+
+      {% if type == 'bond' %}
+	{% include "_debian_bond.j2" %}
+      {% endif %}
+
+    {% endif %}
+  {% endif %}
+  
+{% endmacro %}
+
+{% if (item.addresses | default([]) | ipv4)
+  or (item.dhcp4 is defined and item.dhcp4 )
+  %}
+  !ipv4
+  {% set debian_command_options = 'inet' %}
+  {% set bond_in = 'inet' %}
+{% elif (item.addresses | default([]) | ipv6 ) %}
+  !ipv6
+  {% set debian_command_options = 'inet6' %}
+  {% set bond_in = 'inet6' %}
+{% else %}
+  !!ipv4
+  {% set debian_command_options = 'inet' %}
+  {% set bond_in = 'inet' %}
+{% endif %}
+
+{% block content %}{% endblock %}
+
+{#
+
+if ipv4 address or dhcp4 or debian_command_options
+then configure_ipv4
+fi
+
+if ipv6 address
+then configure_ipv6
+fi
+
+if bonding options
+then
+==if configure_ipv4 ->ipv4
+==else if configure_ipv6 ->ipv6
+==else ->ipv4
+else ->ipv4
+#}
+
+
+{% macro macro_hwaddress( item ) %}
+{% if item.macaddress is defined %}
+    hwaddress {{ item.macaddress }}
+{% endif %}
+{% endmacro %}
