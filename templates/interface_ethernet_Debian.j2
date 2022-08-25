@@ -4,9 +4,7 @@
 {% block content %}
 {{ item._debian_iface_selection | default('auto') }} {{ item.device }}
 
----ipv4---
-{{ def_iface('inet', item) }}
+{{ def_iface('ethernet', 'inet', item) }}
 
----ipv6---
-{{ def_iface('inet6', item) }}  
+{{ def_iface('ethernet', 'inet6', item) }}  
 {% endblock %}

@@ -61,7 +61,7 @@ network_ether_interfaces:
     _debian_ipv4_method: static # Force method: manual | loopback | dhcp | etc...
     _debian_iface_selection: auto # allow-hotplug , etc...
   - device: eth1
-    _debian_verbatim:
+    ifupdown_verbatim:
       - family: inet
         method: static
 	options:
