@@ -1,11 +1,7 @@
 {% extends "interface_Debian_macros.j2" %}
-{% block content %}
+{% block main %}
 {{ item._debian_iface_selection | default('auto') }} {{ item.device }}
-
----ipv4---
 {{ def_iface('bond', 'inet', item) }}
-
----ipv6---
 {{ def_iface('bond', 'inet6', item) }}  
 {% endblock %}
 

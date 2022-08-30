@@ -29,8 +29,8 @@
             
         
           
-    # network_interface_expand_cidr: false
-    # network_interface_auto_gateway: false
+    network_interface_expand_cidr: false
+    network_interface_auto_gateway: false
   tasks:
 
     - template:
@@ -38,18 +38,24 @@
         dest: interface_ethernet_debian.txt
       vars:
         item: "{{ network_ether_interfaces[0] }}"
+      tags:
+        - "1"
+        
 
     - template:
         src: ../../templates/interface_ethernet_Debian.j2
         dest: interface_ethernet_debian_command_opts.txt
       vars:
         item: "{{ network_ether_interfaces[1] }}"
+      tags:
+        - "2"
 
     - template:
         src: ../../templates/interface_bond_Debian.j2
         dest: interface_bond_Debian_static_ipv4.txt
       vars:
         item: "{{ network_bond_interfaces[0] }}"
+      tags: [ "bond-1" ]
 
     - template:
         src: ../../templates/interface_bond_Debian.j2

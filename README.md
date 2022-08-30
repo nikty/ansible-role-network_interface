@@ -58,8 +58,13 @@ network_ether_interfaces:
       - "down /execute/that"
     debian_command_options_ipv6: # TODO: do we need this?
       - "up /execute/this"
+    debian_command_options_ipv4:
+      - "up /execute/only/for/ipv4/iface"
+    debian_method_ipv4: FORCE METHOD
+    debian_method_ipv6: FORCE METHOD
     _debian_ipv4_method: static # Force method: manual | loopback | dhcp | etc...
     _debian_iface_selection: auto # allow-hotplug , etc...
+    ifupdown_iface_selection:
   - device: eth1
     ifupdown_verbatim:
       - family: inet
