@@ -12,7 +12,7 @@
 - name: Find interface config files to delete
   find:
     paths: "{{ net_path }}"
-    excludes: "{{ [ network_interface_file_prefix ] | product(managed_devices) | map('join', '') | list | product([ network_interface_file_postfix ]) | map('join', '') | list }}"
+    excludes: "{{ [ network_interface_file_prefix ] | product(managed_devices) | map('join', '') | list | product([ network_interface_file_postfix ]) | map('join', '') | list if managed_devices | default([]) else [] }}"
   register: config_files_to_delete
 
 - name: Remove all interfaces config files not matching the pattern

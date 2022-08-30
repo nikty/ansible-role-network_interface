@@ -1,0 +1,92 @@
+- hosts: all
+  vars:
+    network_configured_interfaces_only: yes
+    network_restart_interfaces: false
+    network_interface_implicit_loopback: yes
+
+  become: yes
+  tasks:
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth0
+        type: veth
+        state: present
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth10
+        type: veth
+        state: present
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth11
+        type: veth
+        state: present
+
+    - import_role:
+        name: network_interface
+      vars:
+        network_bond_interfaces:
+          
+          - device: bond0
+            mtu: 1000
+            debian_command_options:
+              - up true
+              - down true
+            interfaces: [ veth10, veth11 ]
+            parameters:
+              mode: 802.3ad
+
+        network_ether_interfaces:
+          - device: veth0
+            addresses:
+              - 172.16.191.167/25
+            debian_command_options:
+              - ip route add table 1000 default via 172.16.191.129 || true
+              - |
+                [ -z "$(ip rule ls from 172.16.191.167/25 table 1000)" ] && \
+                ip rule add from 172.16.191.167/25 table 1000 || true
+
+          - device: lo
+            debian_command_options:
+              - post-up ip address add dev $IFACE 172.29.250.184/32 || true
+
+
+    - pause:
+      when: lookup('env', 'TEST_PAUSE')
+      
+
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth0
+        type: veth
+        state: ansent
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth10
+        type: veth
+        state: ansent
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth11
+        type: veth
+        state: absent
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore

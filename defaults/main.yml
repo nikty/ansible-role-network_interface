@@ -23,6 +23,9 @@ network_interface_assume_dhcp: false
 
 network_interface_loopback_name: lo
 
+# Configure loopback interface even if it's not supplied in role parameters
+network_interface_implicit_loopback: true
+
 # network_interface_bond_options:
 
 network_restart_interfaces: true

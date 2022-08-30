@@ -1,8 +1,15 @@
 {# {% from "interface_Debian_macros.j2" import def_iface with context %} #}
 
-{% extends "interface_Debian_macros.j2" %} 
-{% block main %} 
-{{ item._debian_iface_selection | default('auto') }} {{ item.device }}
+{% extends "ifupdown_interface_base.j2" %} 
+{% block main %}
+
+{% if not (item.device == network_interface_loopback_name and network_interface_implicit_loopback) %}
+{{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
+{% endif %}
+
+{% if item.device == network_interface_loopback_name and not network_interface_implicit_loopback %}
+iface {{ item.device }} inet loopback
+{% endif %}
 
 {{ def_iface('ethernet', 'inet', item) }}
 

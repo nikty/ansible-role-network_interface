@@ -1,9 +1,11 @@
 - hosts: localhost
   vars:
     network_ether_interfaces:
+
       - device: eth0
         addresses:
           - 192.0.2.1/24
+
       - device: eth1
         debian_command_options:
           - up foo
@@ -11,13 +13,25 @@
         addresses:
           - 2001:db8::1/64
 
+      - device: eth0
+        ifupdown_verbatim: |
+          iface eth0 inet manual
+              up this
+              down that
+
+      - device: lo
+        debian_command_options:
+          - up /for/loopback
+
     network_bond_interfaces:
+
       - device: bond0
         interfaces:
           - eth0
           - eth1
         parameters:
           mode: 802.3ad
+
       - device: bond1
         interfaces:
           - eth0
@@ -35,7 +49,7 @@
 
     - template:
         src: ../../templates/interface_ethernet_Debian.j2
-        dest: interface_ethernet_debian.txt
+        dest: interface_ethernet_static.txt
       vars:
         item: "{{ network_ether_interfaces[0] }}"
       tags:
@@ -44,11 +58,32 @@
 
     - template:
         src: ../../templates/interface_ethernet_Debian.j2
-        dest: interface_ethernet_debian_command_opts.txt
+        dest: interface_ethernet_static_ipv6_command_options.txt
       vars:
         item: "{{ network_ether_interfaces[1] }}"
       tags:
         - "2"
+
+    - template:
+        src: ../../templates/interface_ethernet_Debian.j2
+        dest: interface_ethernet_ifupdown_verbatim.txt
+      vars:
+        item: "{{ network_ether_interfaces[2] }}"
+      tags:
+        - "3"
+        - "ether"
+
+    - template:
+        src: ../../templates/interface_ethernet_Debian.j2
+        dest: interface_ethernet_ifupdown_lo_with_options.txt
+      vars:
+        item: "{{ network_ether_interfaces[3] }}"
+        network_interface_loopback_name: lo
+        network_interface_implicit_loopback: false
+      tags:
+        - "4"
+        - "ether"
+        
 
     - template:
         src: ../../templates/interface_bond_Debian.j2
