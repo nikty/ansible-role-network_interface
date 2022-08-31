@@ -6,3 +6,5 @@ network_pkgs:
   - iproute2
 
 net_path: "/etc/network/interfaces.d"
+
+network_interface_backend: ifupdown

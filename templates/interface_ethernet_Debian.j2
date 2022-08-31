@@ -1,17 +1,17 @@
-{# {% from "interface_Debian_macros.j2" import def_iface with context %} #}
-
-{% extends "ifupdown_interface_base.j2" %} 
+#jinja2: lstrip_blocks:True, trim_blocks:True
+{% extends "ifupdown_interface_base.j2" %}
 {% block main %}
 
-{% if not (item.device == network_interface_loopback_name and network_interface_implicit_loopback) %}
+{%- if not (item.device == network_interface_loopback_name and network_interface_implicit_loopback) %}
 {{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
 {% endif %}
 
-{% if item.device == network_interface_loopback_name and not network_interface_implicit_loopback %}
+{%- if item.device == network_interface_loopback_name and not network_interface_implicit_loopback %}
 iface {{ item.device }} inet loopback
-{% endif %}
+{% endif -%}
 
 {{ def_iface('ethernet', 'inet', item) }}
 
-{{ def_iface('ethernet', 'inet6', item) }}  
-{% endblock %} 
+{{ def_iface('ethernet', 'inet6', item) }}
+
+{%- endblock %} 

@@ -31,6 +31,9 @@
             gateway4: "{{ test_ip_gateway4 }}"
         network_restart_interfaces: false
 
+
+    - include_tasks: helpers/debug_pause.yaml
+
     - name: Remove default route
       include_tasks: helpers/remove_restore_default_route.yaml
       vars:

@@ -1,0 +1,2 @@
+- pause:
+  when: lookup('env', 'TEST_PAUSE')

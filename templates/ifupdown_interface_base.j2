@@ -1,114 +1,9 @@
-{% macro macro_iface_selection(iface_name, stanza='auto') %}
-{{ stanza }} {{ iface_name }}
-{% endmacro %}
-
-{% macro def_iface_ipv4(type, item) %}
-  {% if item.addresses is defined and item.addresses | ipv4 %}
-    {% set method = 'static' %}
-  {% elif item.dhcp4 is defined and item.dhcp4 %}
-    {% set method = 'dhcp' %}
-  {% elif (item.debian_command_options is defined and item.debian_command_options and debian_command_options == 'inet')
-    or (item.debian_command_options_ipv4 | default([]) )
-    or (type == 'bond' and bond_in == 'inet') %}
-    {% set method = 'manual' %}
-  {% endif %}
-
-  {% if method is defined %}
-    iface {{ item.device }} {{ family }} {{ method }}
-
-    {% include "_debian_ipv4.j2" %}
-
-    {% if debian_command_options == family %}
-      {% for opt in item.debian_command_options | default([]) %}
-	{{ opt }}
-      {% endfor %}
-    {% endif %}
-
-    {% if type == 'bond' %}
-      {% include "_debian_bond.j2" %}
-    {% endif %}
-
-    {% if type == 'vlan' %}
-    {% endif %}
-  {% endif %}
-
-{% endmacro %}
-
-{% macro common_options() %}
-  {% for opt in item.debian_command_options | default([]) %}
-    {{ opt }}
-  {% endfor %}
-  {% if item.mtu is defined %}
-    mtu {{ item.mtu }}
-  {% endif %}
-{% endmacro %}
-
-
-{% macro def_iface(type, family, item) %}
-  {% if family == 'inet' %}
-    {% if item.addresses is defined and item.addresses | ipv4 %}
-      {% set method = 'static' %}
-    {% elif item.dhcp4 is defined and item.dhcp4 %}
-      {% set method = 'dhcp' %}
-    {% elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet')
-      or (type == 'bond' and default_family == family) %}
-      {% set method = 'manual' %}
-    {% endif %}
-
-    {% if method is defined %}
-      iface {{ item.device }} {{ family }} {{ method }}
-
-      {% include "ifupdown_ipv4_options.j2" %}
-
-      {% if default_family == family %}
-	{# {% for opt in item.debian_command_options | default([]) %} #}
-	{#   {{ opt }} #}
-	{# {% endfor %} #}
-	{# {% if item.mtu is defined %} #}
-	{#   mtu {{ item.mtu }} #}
-	{# {% endif %} #}
-	{{ common_options() }}
-      {% endif %}
-
-      {% if type == 'bond' %}
-	{% include "_debian_bond.j2" %}
-      {% endif %}
-
-    {% endif %}
-  {% endif %}
-
-  {% if family == 'inet6' %}
-    {% if item.addresses is defined and item.addresses | ipv6 %}
-      {% set method = 'static' %}
-    {% elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet6')
-      or (type == 'bond' and default_family == family ) %}
-      {% set method = 'manual' %}
-    {% endif %}
-
-    {% if method is defined %}
-      iface {{ item.device }} {{ family }} {{ method }}
-      {% include "ifupdown_ipv6_options.j2" %}
-      
-      {% if default_family == family %}
-	{% for opt in item.debian_command_options | default([]) %}
-	  {{ opt }}
-	{% endfor %}
-      {% endif %}
-
-      {% if type == 'bond' %}
-	{% include "_debian_bond.j2" %}
-      {% endif %}
-
-    {% endif %}
-  {% endif %}
-  
-{% endmacro %}
-
-{#-
-Where to put additional condiguration,
-like "debian_command_options" or bonding options.
--#}
-{% if (item.addresses | default([]) | ipv4)
+{#
+# Decide where to put additional condiguration,
+# like "debian_command_options" or bonding options,
+# in case there are multiple IP families defined.
+#}
+{%- if (item.addresses | default([]) | ipv4)
   or (item.dhcp4 is defined and item.dhcp4 )
   %}
   {% set default_family = 'inet' %}
@@ -118,40 +13,15 @@ like "debian_command_options" or bonding options.
   {% set default_family = 'inet' %}
 {% endif %}
 
-{% block main %}{% endblock %}
+{%- from "ifupdown_macros.j2" import def_iface with context %}
 
-{#
+{%- block main %}{% endblock %}
 
-if ipv4 address or dhcp4 or debian_command_options
-then configure_ipv4
-fi
-
-if ipv6 address
-then configure_ipv6
-fi
-
-if bonding options
-then
-==if configure_ipv4 ->ipv4
-==else if configure_ipv6 ->ipv6
-==else ->ipv4
-else ->ipv4
-#}
-
-
-{% macro macro_hwaddress( item ) %}
-{% if item.macaddress is defined %}
-    hwaddress {{ item.macaddress }}
-{% endif %}
-{% endmacro %}
-
-
-{#
-If you're not happy with config this role generates,
-you can write in ifupdown syntax
-and it will be rendered verbatim.
-#}
-
+{#-
+# If you're not happy with config this role generates,
+# you can write in ifupdown syntax
+# and it will be rendered verbatim.
+-#}
 {% if item.ifupdown_verbatim is defined %} 
 {{ item.ifupdown_verbatim  }}
-{% endif %}   
+{% endif %}

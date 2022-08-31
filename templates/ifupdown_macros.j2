@@ -1,0 +1,110 @@
+{% macro common_options() %}
+  {% for opt in item.debian_command_options | default([]) %}
+    {{ opt }}
+  {% endfor %}
+  {% if item.mtu is defined %}
+    mtu {{ item.mtu }}
+  {% endif %}
+  {{ macro_macaddress() }}
+{% endmacro %}
+
+{% macro macro_macaddress() %}
+{% if item.macaddress is defined %}
+    hwaddress {{ item.macaddress }}
+{% endif %}
+{% endmacro %}
+
+{%- macro def_iface(type, family, item) %}
+
+  {%- if family == 'inet6' %}
+    {% if item.addresses is defined and item.addresses | ipv6 %}
+      {% set method = 'static' %}
+    {% elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet6')
+      or (type == 'bond' and default_family == family ) %}
+      {% set method = 'manual' %}
+    {% endif %}
+  {% endif %}
+
+  {%- if family == 'inet' %}
+    {% if item.addresses is defined and item.addresses | ipv4 %}
+      {% set method = 'static' %}
+    {% elif item.dhcp4 is defined and item.dhcp4 %}
+      {% set method = 'dhcp' %}
+    {% elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet')
+      or (type == 'bond' and default_family == family) %}
+      {% set method = 'manual' %}
+    {% endif %}
+  {% endif -%}
+
+  {% if method is defined %}
+iface {{ item.device }} {{ family }} {{ method }}
+
+    {% if family == 'inet' %}
+      {% include "ifupdown_ipv4_options.j2" %}
+    {% endif %}
+
+    {% if family == 'inet6' %}
+      {% include "ifupdown_ipv6_options.j2" %}
+    {% endif %}
+
+    {% if default_family == family -%}
+    {{ common_options() }}
+      {% if type == 'bond' %}
+	{% include "_debian_bond.j2" %}
+      {% endif %}
+    {% endif %}
+  {% endif -%}
+
+  {#
+  {% if family == 'inet' %}
+    {% if item.addresses is defined and item.addresses | ipv4 %}
+      {% set method = 'static' %}
+    {% elif item.dhcp4 is defined and item.dhcp4 %}
+      {% set method = 'dhcp' %}
+    {% elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet')
+      or (type == 'bond' and default_family == family) %}
+      {% set method = 'manual' %}
+    {% endif %}
+
+    {% if method is defined %}
+      iface {{ item.device }} {{ family }} {{ method }}
+
+      {% include "ifupdown_ipv4_options.j2" %}
+
+      {% if default_family == family %}
+	{{ common_options() }}
+      {% endif %}
+
+      {% if type == 'bond' %}
+	{% include "_debian_bond.j2" %}
+      {% endif %}
+
+    {% endif %}
+  {% endif %}
+
+  {% if family == 'inet6' %}
+    {% if item.addresses is defined and item.addresses | ipv6 %}
+      {% set method = 'static' %}
+    {% elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet6')
+      or (type == 'bond' and default_family == family ) %}
+      {% set method = 'manual' %}
+    {% endif %}
+
+    {% if method is defined %}
+      iface {{ item.device }} {{ family }} {{ method }}
+      {% include "ifupdown_ipv6_options.j2" %}
+      
+      {% if default_family == family %}
+	{% for opt in item.debian_command_options | default([]) %}
+	  {{ opt }}
+	{% endfor %}
+      {% endif %}
+
+      {% if type == 'bond' %}
+	{% include "_debian_bond.j2" %}
+      {% endif %}
+
+    {% endif %}
+  {% endif %}
+  #}
+{% endmacro -%}

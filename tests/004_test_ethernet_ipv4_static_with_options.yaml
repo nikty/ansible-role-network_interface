@@ -7,7 +7,7 @@
     test_ip_address: 192.0.2.2/24
     test_ip_gateway4: 192.0.2.1
     test_option_1: "post-up echo first option || true"
-    test_option_2: |
+    test_option_2: |-
       post-up echo second very \
       long option || true
     test_option_3: "post-down echo third option is run on interface down || true"
@@ -25,8 +25,7 @@
         type: veth
         state: present
       
-    - name: Test configuring static ipv4 with default gateway
-      import_role:
+    - import_role:
         name: network_interface
       become: yes
       vars:
@@ -41,6 +40,8 @@
               - "{{ test_option_3 }}"
         network_restart_interfaces: false
       when: ansible_distribution == "Debian"
+
+    - include_tasks: helpers/debug_pause.yaml
 
     - name: Remove default route
       include_tasks: helpers/remove_restore_default_route.yaml

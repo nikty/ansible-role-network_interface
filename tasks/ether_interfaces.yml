@@ -12,7 +12,7 @@
 - name: Create the network configuration file for ethernet interfaces
   template:
     #src: "ethernet_{{ ansible_os_family }}.j2"
-    src: interface_ethernet_Debian.j2
+    src: "interface_ethernet_{{ ansible_os_family }}.j2"
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_ether_interfaces }}"
   when: item.present | default(True)

@@ -21,8 +21,7 @@
         type: veth
         state: present
       
-    - name: Test configuring static ipv4 with default gateway
-      import_role:
+    - import_role:
         name: network_interface
       become: yes
       vars:
@@ -30,6 +29,8 @@
           - device: "{{ test_iface_name }}"
             addresses: "{{ test_ip_addresses }}"
         network_restart_interfaces: false
+
+    - include_tasks: helpers/debug_pause.yaml
 
     - name: Start interface
       include_tasks: tasks/system_interface_control.yaml
