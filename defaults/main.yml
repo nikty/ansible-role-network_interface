@@ -15,17 +15,23 @@ network_configured_interfaces_only: false
 network_interface_file_prefix: "ifcfg-"
 network_interface_file_postfix: ""
 
-network_interface_expand_cidr: false
 network_interface_auto_gateway: false
 
 # If we can't decide on interface's config, assume DHCP.
 network_interface_assume_dhcp: false
 
-network_interface_loopback_name: lo
+# Loopback interface options
 
+network_interface_loopback_name: lo
 # Configure loopback interface even if it's not supplied in role parameters
 network_interface_implicit_loopback: true
 
-# network_interface_bond_options:
-
+# Whether to restart interfaces after configuration
 network_restart_interfaces: true
+
+# Whether to use separate configuration words for address and netmask, instead if CIDR
+# E.g., 192.0.2.1/24 becomes something like
+#     address 192.0.2.1
+#     netmask 255.255.255.0
+# (depends on network configuration format)
+network_interface_expand_cidr: false

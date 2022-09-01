@@ -50,7 +50,7 @@ iface {{ item.device }} {{ family }} {{ method }}
     {% if default_family == family -%}
     {{ common_options() }}
       {% if type == 'bond' %}
-	{% include "_debian_bond.j2" %}
+	{% include "ifupdown_bond_options.j2" %}
       {% endif %}
     {% endif %}
   {% endif -%}

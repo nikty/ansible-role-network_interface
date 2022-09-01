@@ -2,7 +2,7 @@
 
 - name: Create configuration files for vlan devices
   template:
-    src: "ethernet_{{ ansible_os_family }}.j2"
+    src: "interface_ethernet_{{ ansible_os_family }}.j2"
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_vlan_interfaces }}"
   when:

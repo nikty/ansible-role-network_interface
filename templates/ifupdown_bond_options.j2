@@ -1,0 +1,84 @@
+{% if item.parameters is defined %}
+{% set params = item.parameters %}
+
+{% if params.mode is defined %}
+    bond-mode {{ params.mode }}
+{% endif %}
+
+{%- if params['mii-monitor-interval'] is defined %}
+    bond-miimon {{ params['mii-monitor-interval'] }}
+{% endif %}
+
+{%- if params['transmit-hash-policy'] is defined %}
+    bond-xmit-hash-policy {{ params['transmit-hash-policy'] }}
+{% endif %}
+  
+{%- if params['lacp-rate'] is defined %}
+    bond-lacp-rate {{ params['lacp-rate'] }}
+{% endif %}
+{% endif %}
+
+{%- if item.interfaces is defined %}
+    bond-slaves {{ item.interfaces | join(' ') }}
+{% endif %}
+
+
+
+{#
+  {% if item.bond_mode is defined and item.bond_slaves is defined %}
+{% if item.bond_mode is defined %}
+    bond-mode              {{ item.bond_mode }}
+    bond-miimon            {{ item.bond_miimon | default(100) }}
+{% if item.bond_mode == '802.3ad' or item.bond_mode == 4 %}
+    bond-lacp-rate         {{ item.bond_lacp_rate | default('slow') }}
+{% endif %}
+{% if item.bond_mode == 2 or item.bond_mode == 'balance-xor'
+   or item.bond_mode == 4 or item.bond_mode == '802.3ad'
+   or item.bond_mode == 6 or item.bond_mode == 'balance-tlb'
+%}
+    bond-xmit-hash-policy  {{ item.bond_xmit_hash_policy | default('layer3+4') }}
+{% endif %}
+
+{% if item.bond_downdelay is defined %}
+    bond-downdelay         {{ item.bond_downdelay }}
+{% endif %}
+{% if item.bond_updelay is defined %}
+    bond-updelay           {{ item.bond_updelay }}
+{% endif %}
+{% if item.bond_ad_select is defined %}
+    bond-ad-select         {{ item.bond_ad_select }}
+{% endif %}
+{% if item.bond_arp_interval is defined %}
+    bond-arp-interval      {{ item.bond_arp_interval }}
+{% endif %}
+{% if item.bond_arp_ip_target is defined %}
+    bond-arp-ip-target     {{ item.bond_arp_ip_target }}
+{% endif %}
+{% if item.bond_arp_validate is defined %}
+    bond-arp-validate      {{ item.bond_arp_validate }}
+{% endif %}
+{% if item.bond_num_grat_arp is defined %}
+    bond-num-grat-arp      {{ item.bond_num_grat_arp }}
+{% endif %}
+{% if item.bond_num_unsol_na is defined %}
+    bond-num-unsol-na      {{ item.bond_num_unsol_na }}
+{% endif %}
+{% if item.bond_primary is defined %}
+    bond-primary           {{ item.bond_primary }}
+{% endif %}
+{% if item.bond_primary_reselect is defined %}
+    bond-primary-reselect  {{ item.bond_primary_reselect }}
+{% endif %}
+{% if item.bond_use_carrier is defined %}
+    bond-use-carrier       {{ item.bond_use_carrier }}
+{% endif %}
+{% if item.bond_slaves is defined %}
+    bond-slaves             {{ item.bond_slaves|join(' ') }}
+{% endif %}
+{% if item.bond_active_slave is defined %}
+    bond-active-slave      {{ item.bond_active_slave }}
+{% endif %}
+{% endif %}
+{% endif %}
+
+#}

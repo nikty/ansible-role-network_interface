@@ -1,6 +1,11 @@
+#jinja2: lstrip_blocks:True, trim_blocks:True
 {% extends "ifupdown_interface_base.j2" %}
 {% block main %}
-{{ item._debian_iface_selection | default('auto') }} {{ item.device }}
+
+{{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
+
 {{ def_iface('bond', 'inet', item) }}
+
 {{ def_iface('bond', 'inet6', item) }}  
+
 {% endblock %}
