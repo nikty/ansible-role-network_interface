@@ -2,12 +2,10 @@
   set_fact:
     network_interface_loopback_interfaces: "{{ network_interface_loopback_interfaces | default([]) + [ { 'device' : network_interface_loopback_name } ] }}"
   when:
-    - (network_interface_loopback_name
-    
     - "network_interface_loopback_name not in network_ether_interfaces | map(attribute='device')"
     - ansible_os_family != "RedHat"
     - False # disabled - TODO
-  
+
   
 - name: Create the network configuration file for ethernet interfaces
   template:

@@ -35,37 +35,94 @@
     - import_role:
         name: network_interface
       vars:
-        network_bond_interfaces:
-          
-          - device: bond0
-            mtu: 1280
-            debian_command_options:
-              - up true
-              - down true
-            interfaces: [ veth10, veth11 ]
-            parameters:
-              mode: 802.3ad
-            addresses:
-              - 10.0.0.1/32
-              - 2001:db8::1/64
-            
-
+        network_configured_interfaces_only: yes
+        network_restart_interfaces: false
+        
         network_ether_interfaces:
+          # Management
           - device: veth0
             addresses:
-              - 172.16.191.167/25
+              - 172.19.9.58/30
             debian_command_options:
-              - ip route add table 1000 default via 172.16.191.129 || true
+              - post-up ip route add table 1000 default via 172.19.9.57 || true
               - |
-                [ -z "$(ip rule ls from 172.16.191.167/25 table 1000)" ] && \
-                ip rule add from 172.16.191.167/25 table 1000 || true
-            macaddress: 00:00:00:00:06:66
-
+                post-up [ -z "$(ip rule ls from 172.19.9.58/30 table 1000)" ] && \
+                    ip rule add from 172.19.9.58/30 table 1000 || true
+            description: "mgmt"
+        
+        
+          # Loopback
           - device: lo
+            addresses:
+              - 172.16.123.232/32
             debian_command_options:
-              - post-up ip address add dev $IFACE 172.29.250.184/32 || true
+              #- post-up ip address add dev $IFACE 10.0.0.1/32 || true
+              - post-up ip rule del from all lookup main || true
+              - post-up ip rule add from all lookup main pref 32000 || true
+              - post-up ip rule add from all iif lo lookup 1000 pref 32100 || true
+        
+          # To internet
+          - device: veth10
+            addresses:
+              - 172.16.100.245/31
+              - 2a01:590:0:1::26/127
+            debian_command_options:
+              - pre-up ethtool -G $IFACE rx 4096 tx 4096 || true
+            description: "to internet"
+        
+        network_vlan_interfaces:
+          # To clients
+          - device: veth11.1730
+            addresses:
+              - 172.16.100.246/31
+              - 2a01:590:0:1::25/127
+            debian_command_options:
+              - pre-up ethtool -G $IFACE rx 4096 tx 4096 || true
+            description: to clients
+        
+          # Service delayed
+          - device: veth11.934
+            addresses:
+              - 85.114.3.162/28
+            debian_command_options:
+              - post-up ip route add table 5 default via 85.114.3.166 || true
+              - post-up ip rule ls | grep 'from all fwmark 0x5 lookup 5' >/dev/null 2>&1 || \
+                        ip rule add fwmark 0x5 table 5 || true
+            description: service delayed
+            
+        # network_bond_interfaces:
+          
+        #   - device: bond0
+        #     mtu: 1280
+        #     debian_command_options:
+        #       - up true
+        #       - down true
+        #     interfaces: [ veth10, veth11 ]
+        #     parameters:
+        #       mode: 802.3ad
+        #     addresses:
+        #       - 10.0.0.1/32
+        #       - 2001:db8::1/64
+            
 
-          - device: bond0.666
+        # network_ether_interfaces:
+        #   - device: veth0
+        #     addresses:
+        #       - 172.16.191.167/25
+        #     debian_command_options:
+        #       - ip route add table 1000 default via 172.16.191.129 || true
+        #       - |
+        #         [ -z "$(ip rule ls from 172.16.191.167/25 table 1000)" ] && \
+        #         ip rule add from 172.16.191.167/25 table 1000 || true
+        #     macaddress: 00:00:00:00:06:66
+
+        #   - device: lo
+        #     debian_command_options:
+        #       - post-up ip address add dev $IFACE 172.29.250.184/32 || true
+
+        # network_vlan_interfaces:
+        #   - device: bond0.666
+        #     dhcp4: yes
             
 
 

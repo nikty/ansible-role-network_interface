@@ -1,7 +1,7 @@
 {#
-# Decide where to put additional condiguration,
-# like "debian_command_options" or bonding options,
-# in case there are multiple IP families defined.
+## Decide where to put additional condiguration,
+## like "debian_command_options" or bonding options,
+## in case there are multiple IP families defined.
 #}
 {%- if (item.addresses | default([]) | ipv4)
   or (item.dhcp4 is defined and item.dhcp4 )
@@ -18,9 +18,9 @@
 {%- block main %}{% endblock %}
 
 {#-
-# If you're not happy with config this role generates,
-# you can write in ifupdown syntax
-# and it will be rendered verbatim.
+## If you're not happy with config this role generates,
+## you can write in ifupdown syntax
+## and it will be rendered verbatim.
 -#}
 {% if item.ifupdown_verbatim is defined %} 
 {{ item.ifupdown_verbatim  }}

@@ -63,8 +63,9 @@ network_ether_interfaces:
     debian_method_ipv4: FORCE METHOD
     debian_method_ipv6: FORCE METHOD
     ##_debian_ipv4_method: static # Force method: manual | loopback | dhcp | etc...
-    ##_debian_iface_selection: auto # allow-hotplug , etc...
     ifupdown_iface_selection:
+    description: foo
+
   - device: eth1
     ifupdown_verbatim:
       - family: inet

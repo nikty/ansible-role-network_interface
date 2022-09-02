@@ -1,6 +1,5 @@
 {% if item.addresses is defined and item.addresses | ipv4 %} 
 {% set ipv4_list = item.addresses | ipv4() %}
-
 {% if network_interface_expand_cidr %}
     address {{ ipv4_list[0] | ipaddr('address') }}
     network {{ ipv4_list[0] | ipaddr('network') }}
@@ -10,23 +9,23 @@
   {% endif %}
 {% else %}
     address {{ ipv4_list[0] }}
-{% endif %}
+{% endif -%}
 
 {% if item.gateway4 is defined and item.gateway4 != 'auto' %}
     gateway {{ item.gateway4 }}
 {% elif item.gateway4 is defined and item.gateway4 == 'auto' or network_interface_auto_gateway %}
     gateway {{ ipv4_list[0] | ipaddr('1') | ipaddr('address') }}
-{% endif %}
+{% endif -%}
 
 {% for address in ipv4_list[1:] %}
     up ip address add dev $IFACE {{ address }}
     down ip address del dev $IFACE {{ address }}
 {% endfor %}
-{% endif %} 
+{% endif -%} 
 
 {% if network_interface_debian_resolvconf |default(False) %}
 {% include 'Debian_resolvconf.j2' %}
-{% endif %}
+{% endif -%}
 
 {% if item.routes is defined %}
 {% for route in item.routes %}

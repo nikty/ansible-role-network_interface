@@ -1,30 +1,22 @@
 {% set ipv6_list = item.addresses | ipv6 %}
-address {{ ipv6_list[0] }}
+    address {{ ipv6_list[0] }}
 
 {% for subnet in ipv6_list[1:] %}
-  up   /sbin/ip address add {{ subnet }} dev $IFACE
-  down /sbin/ip address del {{ subnet }} dev $IFACE
+    up   /sbin/ip address add {{ subnet }} dev $IFACE
+    down /sbin/ip address del {{ subnet }} dev $IFACE
 {% endfor %}
 
 {% if item.gateway6 is defined and item.gateway6 != 'auto' %}
-  gateway {{ item.gateway6 }}
+    gateway {{ item.gateway6 }}
 {% elif item.gateway6 is defined and item.gateway6 == 'auto' or network_interface_auto_gateway %}
-  gateway {{ ipv6_list[0] | ipaddr('1') | ipaddr('address') }}
+    gateway {{ ipv6_list[0] | ipaddr('1') | ipaddr('address') }}
 {% endif %}
 
 
 {% if item.routes is defined %}
   {% for route in item.routes %}
     {% if route.to | ipv6 or route.via | ipv6 %}
-      up ip route add {{ route.to }} via {{ route.via }}
+    up ip route add {{ route.to }} via {{ route.via }}
     {% endif %}
   {% endfor %}
 {% endif %}
-
-{#
-{% if item.debian_custom_options_ipv6 is defined %}
-  {% for option in item.debian_custom_options_ipv6 %}
-    {{ option }}
-  {% endfor %}
-{% endif %}
-#}

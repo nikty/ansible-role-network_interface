@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
-{% if network_interface_implicit_loopback %}
-auto {{ network_interface_loopback_name }}
-iface {{ network_interface_loopback_name }} inet loopback  
-{% endif %}
+{# {% if network_interface_implicit_loopback %} #}
+{# auto {{ network_interface_loopback_name }} #}
+{# iface {{ network_interface_loopback_name }} inet loopback   #}
+{# {% endif %} #}
 
 source {{ net_path }}/*

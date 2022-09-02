@@ -21,6 +21,8 @@
         network_configured_interfaces_only: yes
         network_restart_interfaces: false
 
+    - include_tasks: helpers/debug_pause.yaml
+
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
       vars:

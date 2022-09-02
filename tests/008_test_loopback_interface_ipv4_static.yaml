@@ -25,7 +25,10 @@
               - 192.0.2.1/32
               - 192.0.2.2/32
         network_configured_interfaces_only: yes
+        #network_interface_implicit_loopback: no
         network_restart_interfaces: false
+
+    - include_tasks: helpers/debug_pause.yaml
 
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
