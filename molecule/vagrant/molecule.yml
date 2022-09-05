@@ -25,5 +25,7 @@ provisioner:
   # inventory:
   #   links:
   #     host_vars: host_vars
+  # ansible_args:
+  #   - "-vvvv"
 verifier:
   name: ansible

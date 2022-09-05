@@ -32,7 +32,6 @@
   
 - name: Configure Ethernet interfaces
   import_tasks: "ether_interfaces.yml"
-  when: network_ether_interfaces | length > 0
 
 - name: Configure Bond interfaces
   import_tasks: "bond_interfaces.yml"

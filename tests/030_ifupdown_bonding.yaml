@@ -1,0 +1,129 @@
+- hosts: all
+  vars:
+
+    network_configured_interfaces_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | bool }}"
+    network_interface_implicit_loopback: "{{ lookup('env', 'TEST_IMPLICIT_LOOPBACK') | bool }}"
+    network_restart_interfaces: false
+    
+    test_bonding_1:
+      - device: bond0
+        mtu: 1280
+        debian_command_options:
+          - up true
+          - down true
+        interfaces: [ veth0, veth1 ]
+        parameters:
+          mode: 802.3ad
+          mii-monitor-interval: 100
+          transmit-hash-policy: layer2+3
+          lacp-rate: fast
+        addresses:
+          - 10.0.0.1/32
+          - 2001:db8::1/64
+          - 2001:db8::2/64
+          - 10.0.0.2/32
+  become: yes
+  tasks:
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth0
+        type: veth
+        state: present
+
+    - name: Add test interface
+      include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: veth1
+        type: veth
+        state: present
+
+
+    - import_role:
+        name: network_interface
+      vars:
+        network_bond_interfaces: "{{ test_bonding_1 }}"
+
+    - include_tasks: helpers/debug_pause.yaml
+
+    - include_tasks: helpers/compare_lines.yaml
+      vars:
+        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_bonding_1[0].device }}{{ network_interface_file_postfix }}"
+        compare_lines_to: |
+          auto bond0
+          iface bond0 inet static
+          address 10.0.0.1/32
+          up ip address add dev $IFACE 10.0.0.2/32
+          down ip address del dev $IFACE 10.0.0.2/32
+
+          
+          up true
+          down true
+          mtu 1280
+
+          bond-mode 802.3ad
+          bond-miimon 100
+          bond-xmit-hash-policy layer2+3
+          bond-lacp-rate fast
+          bond-slaves veth0 veth1
+
+          iface bond0 inet6 static
+          address 2001:db8::1/64
+          up ip address add 2001:db8::2/64 dev $IFACE
+          down ip address del 2001:db8::2/64 dev $IFACE
+
+      when: ansible_os_family == "Debian"
+
+    - include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_bonding_1[0].device }}"
+        state: restart
+
+    - name: Stop interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_bonding_1[0].device }}"
+        state: down
+      
+    # - name: Remove interfaces
+    #   file:
+    #     path: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
+    #     state: absent
+    #   loop: >-
+    #     {{ test_bonding_1 }}
+
+
+    - name: Test removing interface configuration
+      import_role:
+        name: network_interface
+      vars:
+        network_bond_interfaces:
+          - "{{ test_bonding_1[0] | combine( { 'present': False } ) }}"
+
+
+    - include_tasks: tasks/test_interface_config_is_absent.yaml
+      vars:
+        test_iface_name: "{{ test_bonding_1[0].device }}"
+        
+
+    - include_tasks: helpers/debug_pause.yaml
+
+    - include_tasks: helpers/manage_test_interface.yaml
+      vars:
+        interface: "{{ item }}"
+        type: veth
+        state: absent
+      loop:
+        - veth0
+        - veth1
+
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore
+        

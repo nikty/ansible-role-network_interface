@@ -2,8 +2,8 @@
     address {{ ipv6_list[0] }}
 
 {% for subnet in ipv6_list[1:] %}
-    up   /sbin/ip address add {{ subnet }} dev $IFACE
-    down /sbin/ip address del {{ subnet }} dev $IFACE
+    up ip address add {{ subnet }} dev $IFACE
+    down ip address del {{ subnet }} dev $IFACE
 {% endfor %}
 
 {% if item.gateway6 is defined and item.gateway6 != 'auto' %}

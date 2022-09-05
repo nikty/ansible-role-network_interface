@@ -1,0 +1,49 @@
+- hosts: all
+  vars:
+    network_configured_interfaces_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | bool }}"
+    network_interface_implicit_loopback: "{{ lookup('env', 'TEST_IMPLICIT_LOOPBACK') | bool }}"
+    network_restart_interfaces: false
+  become: yes
+  tasks:
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
+
+    - name: Test configuring network with only implicit loopback
+      import_role:
+        name: network_interface
+
+    - include_tasks: helpers/debug_pause.yaml
+
+
+    - name: Test that separate file is created for loopback device
+      include_tasks: helpers/compare_lines.yaml
+      vars:
+        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
+        compare_lines_to: |
+          auto lo
+          iface lo inet loopback
+      when:
+        - ansible_distribution == "Debian"
+        - network_configured_interfaces_only | bool
+        - network_interface_implicit_loopback | bool
+
+    - name: Test that separate file is not created when /network_configured_interfaces_only is False/
+      stat:
+        path: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
+      register: p
+      when:
+        - ansible_distribution == "Debian"
+        - not (network_configured_interfaces_only | bool)
+      failed_when: p.stat.exists
+
+    - include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ network_interface_loopback_name }}"
+        state: restart
+      
+      
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore

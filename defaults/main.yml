@@ -35,3 +35,12 @@ network_restart_interfaces: true
 #     netmask 255.255.255.0
 # (depends on network configuration format)
 network_interface_expand_cidr: false
+
+#
+# EXPERIMENTAL
+#
+
+# Whether to reboot host to restart interfaces (DANGEROUS?)
+# network_interface_restart_interfaces: true
+# network_interface_restart_via: script/service/reboot
+# network_interface_restart_reboot: false
