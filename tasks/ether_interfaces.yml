@@ -1,12 +1,12 @@
 ---
 
-- name: Add default loopback interface
-  set_fact:
-    network_ether_interfaces: "{{ network_ether_interfaces + [ { 'device': network_interface_loopback_name } ] }}"
-  when:
-    - network_configured_interfaces_only
-    - network_interface_implicit_loopback
-    - "network_interface_loopback_name not in network_ether_interfaces | map(attribute='device')"
+# - name: Add default loopback interface
+#   set_fact:
+#     network_ether_interfaces: "{{ network_ether_interfaces + [ { 'device': network_interface_loopback_name } ] }}"
+#   when:
+#     - network_configured_interfaces_only
+#     - network_interface_implicit_loopback
+#     - "network_interface_loopback_name not in network_ether_interfaces | map(attribute='device')"
   
   
 - name: Create the network configuration file for ethernet interfaces
