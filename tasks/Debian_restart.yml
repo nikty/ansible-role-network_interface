@@ -7,7 +7,8 @@
 
 - name: Create a restart script
   template:
-    src: restartscript.j2
+    #src: restartscript.j2
+    src: ifupdown_restart_script.sh.j2
     dest: /tmp/restart_interfaces.sh
     mode: 0755
 
@@ -17,7 +18,12 @@
     sh /tmp/restart_interfaces.sh
   ignore_errors: yes
 
+- pause:
+
 - name: Cleanup Network Restart script
   file:
     path: /tmp/restart_interfaces.sh
     state: absent
+
+# - name: Reboot
+#   when: network_interface_restart_reboot

@@ -53,3 +53,11 @@
 - name: Configure Bridge interfaces
   import_tasks: "bridge_interfaces.yml"
   when: network_bridge_interfaces | length > 0
+
+- name: Restart interfaces via host reboot
+  block:
+    - reboot:
+    - setup:
+  when:
+    - network_restart_interfaces
+    - network_interface_restart_reboot

@@ -1,8 +1,11 @@
 - hosts: all
   vars:
     network_configured_interfaces_only: yes
-    network_restart_interfaces: false
+    #network_restart_interfaces: false
     network_interface_implicit_loopback: yes
+
+    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
+    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
 
   become: yes
   tasks:
@@ -36,7 +39,7 @@
         name: network_interface
       vars:
         network_configured_interfaces_only: yes
-        network_restart_interfaces: false
+        #network_restart_interfaces: false
         
         network_ether_interfaces:
           # Management
@@ -86,7 +89,8 @@
               - 85.114.3.162/28
             debian_command_options:
               - post-up ip route add table 5 default via 85.114.3.166 || true
-              - post-up ip rule ls | grep 'from all fwmark 0x5 lookup 5' >/dev/null 2>&1 || \
+              - |
+                post-up ip rule ls | grep 'from all fwmark 0x5 lookup 5' >/dev/null 2>&1 || \
                         ip rule add fwmark 0x5 table 5 || true
             description: service delayed
             
@@ -126,6 +130,9 @@
             
 
 
+    - include_tasks: helpers/flush_handlers.yaml
+      when: network_restart_interfaces
+
     - include_tasks: helpers/debug_pause.yaml
 
 
@@ -134,14 +141,14 @@
       vars:
         interface: veth0
         type: veth
-        state: ansent
+        state: absent
 
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml
       vars:
         interface: veth10
         type: veth
-        state: ansent
+        state: absent
 
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml

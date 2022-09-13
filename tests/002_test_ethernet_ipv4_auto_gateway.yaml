@@ -7,12 +7,18 @@
     test_ip_address: 192.0.2.2/24
     auto_gateway: 192.0.2.1
 
-    save_default_route: yes
-
+    #save_default_route: yes
+    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
+    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
+    
   tasks:
 
     - name: "Running test [002]"
       debug: msg="[002]"
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
 
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -32,7 +38,7 @@
             addresses:
               - "{{ test_ip_address }}"
             gateway4: "auto"
-        network_restart_interfaces: false
+        #network_restart_interfaces: false
 
     - include_tasks: helpers/debug_pause.yaml
 
@@ -41,6 +47,9 @@
       vars:
         state: absent
     
+    - include_tasks: helpers/flush_handlers.yaml
+      when: network_restart_interfaces
+
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
       vars:
@@ -58,6 +67,7 @@
       vars:
         interface: "{{ test_iface_name }}"
         state: up
+      when: not network_restart_interfaces
         
     - name: Test interface is up
       include_tasks: tasks/test_interface_state.yaml
