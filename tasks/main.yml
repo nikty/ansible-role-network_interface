@@ -29,9 +29,9 @@
   when: network_configured_interfaces_only | bool
 
 
-# Remove config files for interfaces with key "present: no"
-- name: Remove interfaces
-  include_tasks: "remove_interfaces.yaml"
+# # Remove config files for interfaces with key "present: no"
+# - name: Remove interfaces
+#   include_tasks: "remove_interfaces.yaml"
   
 # - name: Configure /etc/resolv.conf
 #   import_tasks: "etc_resolv_conf.yaml"
@@ -54,10 +54,17 @@
   import_tasks: "bridge_interfaces.yml"
   when: network_bridge_interfaces | length > 0
 
-- name: Restart interfaces via host reboot
-  block:
-    - reboot:
-    - setup:
+# - name: Restart interfaces via host reboot
+#   block:
+#     - reboot:
+#     - setup:
+#   when:
+#     - network_restart_interfaces
+#     - network_interface_restart_reboot
+
+- name: Restart interfaces
+  include_tasks: "{{ ansible_os_family }}_restart.yml"
   when:
-    - network_restart_interfaces
-    - network_interface_restart_reboot
+    - network_restart_interfaces | bool
+    - not network_interface_restart_reboot
+    - not (network_interface_restart_via_handlers | default(True) | bool)

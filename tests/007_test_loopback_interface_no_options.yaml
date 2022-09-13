@@ -2,6 +2,13 @@
   become: yes
   vars:
     test_iface_name: lo
+
+    network_configured_interfaces_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | bool }}"
+    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
+    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
+
+  become: yes
+
   tasks:
 
     - name: "Running test [007]"
@@ -18,8 +25,8 @@
       vars:
         network_ether_interfaces:
           - device: lo
-        network_configured_interfaces_only: yes
-        network_restart_interfaces: false
+        #network_configured_interfaces_only: yes
+        #network_restart_interfaces: false
 
     - include_tasks: helpers/debug_pause.yaml
 
@@ -32,6 +39,11 @@
           iface {{ test_iface_name }} inet loopback
       when: ansible_os_family == "Debian"
 
+    - include_tasks: helpers/flush_handlers.yaml
+      
+    - include_tasks: helpers/debug_pause.yaml
+
+
     - include_tasks: tasks/system_interface_control.yaml
       vars:
         interface: "{{ test_iface_name }}"
@@ -43,17 +55,17 @@
         interface: "{{ test_iface_name }}"
         state: down
         
-    - name: Test removing interface configuration
-      import_role:
-        name: network_interface
-      become: yes
-      vars:
-        network_ether_interfaces:
-          - device: "{{ test_iface_name }}"
-            present: no
+    # - name: Test removing interface configuration
+    #   import_role:
+    #     name: network_interface
+    #   become: yes
+    #   vars:
+    #     network_ether_interfaces:
+    #       - device: "{{ test_iface_name }}"
+    #         present: no
 
-    - name: Test interface configuration is absent
-      include_tasks: tasks/test_interface_config_is_absent.yaml
+    # - name: Test interface configuration is absent
+    #   include_tasks: tasks/test_interface_config_is_absent.yaml
 
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:

@@ -8,6 +8,7 @@
     test_ip_gateway4: 192.0.2.1
     test_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
     network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
+  become: yes
   tasks:
 
     - name: "Running test [001]"
@@ -27,7 +28,7 @@
     - name: Test configuring static ipv4 with default gateway
       import_role:
         name: network_interface
-      become: yes
+      #become: yes
       vars:
         network_ether_interfaces:
           - device: "{{ test_iface_name }}"
@@ -106,17 +107,17 @@
       vars:
         state: present
 
-    - name: Test removing interface configuration
-      import_role:
-        name: network_interface
-      become: yes
-      vars:
-        network_ether_interfaces:
-          - device: "{{ test_iface_name }}"
-            present: no
+    # - name: Test removing interface configuration
+    #   import_role:
+    #     name: network_interface
+    #   become: yes
+    #   vars:
+    #     network_ether_interfaces:
+    #       - device: "{{ test_iface_name }}"
+    #         present: no
 
-    - name: Test interface configuration is absent
-      include_tasks: tasks/test_interface_config_is_absent.yaml
+    # - name: Test interface configuration is absent
+    #   include_tasks: tasks/test_interface_config_is_absent.yaml
 
     - name: Remove test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -125,6 +126,11 @@
         type: veth
         state: absent
       
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore
+
+
     ##### Moved this up ^^^
     # - name: Restore default route
     #   include_tasks: helpers/remove_restore_default_route.yaml

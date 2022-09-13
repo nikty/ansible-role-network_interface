@@ -7,10 +7,18 @@
     test_ipv6_address: "2001:db8::2/64"
     test_gateway6: "2001:db8::1"
 
+    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
+    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
+
+  become: yes
   tasks:
 
     - name: "Running test [006]"
       debug: msg="[006]"
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
 
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -22,14 +30,12 @@
     - name: Test configuring static ipv6 with default gateway
       import_role:
         name: network_interface
-      become: yes
       vars:
         network_ether_interfaces:
           - device: "{{ test_iface_name }}"
             addresses:
               - "{{ test_ipv6_address }}"
             gateway6: "{{ test_gateway6 }}"
-        network_restart_interfaces: false
 
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
@@ -42,6 +48,10 @@
           gateway {{ test_gateway6 }}
       when: ansible_distribution == "Debian"
         
+    - include_tasks: helpers/flush_handlers.yaml
+      
+    - include_tasks: helpers/debug_pause.yaml
+
     - name: Start interface
       include_tasks: tasks/system_interface_control.yaml
       vars:
@@ -78,17 +88,17 @@
         interface: "{{ test_iface_name }}"
         state: down
 
-    - name: Test removing interface configuration
-      import_role:
-        name: network_interface
-      become: yes
-      vars:
-        network_ether_interfaces:
-          - device: "{{ test_iface_name }}"
-            present: no
+    # - name: Test removing interface configuration
+    #   import_role:
+    #     name: network_interface
+    #   become: yes
+    #   vars:
+    #     network_ether_interfaces:
+    #       - device: "{{ test_iface_name }}"
+    #         present: no
 
-    - name: Test interface configuration is absent
-      include_tasks: tasks/test_interface_config_is_absent.yaml
+    # - name: Test interface configuration is absent
+    #   include_tasks: tasks/test_interface_config_is_absent.yaml
 
     - name: Remove test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -97,3 +107,6 @@
         type: veth
         state: absent
       
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore

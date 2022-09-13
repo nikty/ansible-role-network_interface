@@ -9,10 +9,20 @@
       - 192.0.2.3/24
       - 192.0.2.4/24
 
+    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
+    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
+
+    network_interface_restart_via_handlers: false
+
+  become: yes
   tasks:
 
     - name: "Running test [003]"
       debug: msg="[003]"
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
 
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -23,12 +33,13 @@
       
     - import_role:
         name: network_interface
-      become: yes
+      #become: yes
       vars:
         network_ether_interfaces:
           - device: "{{ test_iface_name }}"
             addresses: "{{ test_ip_addresses }}"
-        network_restart_interfaces: false
+
+    - include_tasks: helpers/flush_handlers.yaml
 
     - include_tasks: helpers/debug_pause.yaml
 
@@ -62,17 +73,17 @@
         interface: "{{ test_iface_name }}"
         state: down
 
-    - name: Test removing interface configuration
-      import_role:
-        name: network_interface
-      become: yes
-      vars:
-        network_ether_interfaces:
-          - device: "{{ test_iface_name }}"
-            present: no
+    # - name: Test removing interface configuration
+    #   import_role:
+    #     name: network_interface
+    #   become: yes
+    #   vars:
+    #     network_ether_interfaces:
+    #       - device: "{{ test_iface_name }}"
+    #         present: no
 
-    - name: Test interface configuration is absent
-      include_tasks: tasks/test_interface_config_is_absent.yaml
+    # - name: Test interface configuration is absent
+    #   include_tasks: tasks/test_interface_config_is_absent.yaml
 
     - name: Remove test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -80,3 +91,8 @@
         interface: "{{ test_iface_name }}"
         type: veth
         state: absent
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore
+        

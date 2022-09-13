@@ -9,6 +9,7 @@
 
 - name: Restore Debian network configuration
   shell: |
+    set -e
     [ -d /tmp/save_network_config ] || exit
     rm -rf /etc/network/interfaces*
     cp -av /tmp/save_network_config/* /etc/network/

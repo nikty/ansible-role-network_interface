@@ -21,3 +21,15 @@
   register: ether_result
   notify: restart networking
 
+
+- name: Save changed ethernet interfaces
+  set_fact:
+    ether_interfaces_changed: >
+      {{ ether_result.results | default([])
+           | selectattr('changed')
+           | map(attribute='item.device')
+           | list }}
+
+- debug: var=ether_interfaces_changed
+- pause:
+

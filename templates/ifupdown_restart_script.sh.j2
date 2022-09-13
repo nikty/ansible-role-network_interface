@@ -2,8 +2,8 @@
 
 # Shutdown current network configuration
 # Ethernet
-{% for int in ether_result.results | default([]) | map(attribute='item.device') %}
-ifdown {{ int }}
+{% for int in ether_interfaces_changed %}
+ifdown -v {{ int }}
 {% endfor %}
 # Bonding
 {% if bond_port_result is defined and 'results' in bond_port_result %}{% for item in bond_port_result.results %}
@@ -29,9 +29,9 @@ sleep 1
 
 # Start new network configuration
 # Ethernet
-{% if ether_result is defined and 'results' in ether_result %}{% for item in ether_result.results %}
-ifup {{ item.item.device }}
-{% endfor %}{% endif %}
+{% for int in ether_interfaces_changed %}
+ifup -v {{ int }}
+{% endfor %}
 # Bonding
 {% if bond_port_result is defined and 'results' in bond_port_result %}{% for item in bond_port_result.results %}
 ifup {{ item.item.1 }}

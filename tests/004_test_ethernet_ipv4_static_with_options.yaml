@@ -12,11 +12,18 @@
       long option || true
     test_option_3: "post-down echo third option is run on interface down || true"
 
+    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
+    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
 
+  become: yes
   tasks:
 
     - name: "Running test [004]"
       debug: msg="[004]"
+
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: backup
 
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -27,7 +34,6 @@
       
     - import_role:
         name: network_interface
-      become: yes
       vars:
         network_ether_interfaces:
           - device: "{{ test_iface_name }}"
@@ -38,15 +44,17 @@
               - "{{ test_option_1 }}"
               - "{{ test_option_2 }}"
               - "{{ test_option_3 }}"
-        network_restart_interfaces: false
       when: ansible_distribution == "Debian"
-
-    - include_tasks: helpers/debug_pause.yaml
 
     - name: Remove default route
       include_tasks: helpers/remove_restore_default_route.yaml
       vars:
         state: absent
+
+    - include_tasks: helpers/flush_handlers.yaml
+      
+    - include_tasks: helpers/debug_pause.yaml
+
     
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
@@ -67,6 +75,7 @@
       vars:
         interface: "{{ test_iface_name }}"
         state: up
+      when: not network_restart_interfaces
         
     - name: Test interface is up
       include_tasks: tasks/test_interface_state.yaml
@@ -103,17 +112,17 @@
       vars:
         state: present
 
-    - name: Test removing interface configuration
-      import_role:
-        name: network_interface
-      become: yes
-      vars:
-        network_ether_interfaces:
-          - device: "{{ test_iface_name }}"
-            present: no
+    # - name: Test removing interface configuration
+    #   import_role:
+    #     name: network_interface
+    #   become: yes
+    #   vars:
+    #     network_ether_interfaces:
+    #       - device: "{{ test_iface_name }}"
+    #         present: no
 
-    - name: Test interface configuration is absent
-      include_tasks: tasks/test_interface_config_is_absent.yaml
+    # - name: Test interface configuration is absent
+    #   include_tasks: tasks/test_interface_config_is_absent.yaml
 
     - name: Remove test interface
       include_tasks: helpers/manage_test_interface.yaml
@@ -122,7 +131,6 @@
         type: veth
         state: absent
       
-    # - name: Restore default route
-    #   include_tasks: helpers/remove_restore_default_route.yaml
-    #   vars:
-    #     state: present
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore
