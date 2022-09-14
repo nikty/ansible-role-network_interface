@@ -44,23 +44,22 @@
 
 - name: Configure Bond interfaces
   import_tasks: "bond_interfaces.yml"
-  when: network_bond_interfaces | length > 0
 
 - name: Configure VLAN interfaces
   import_tasks: "vlan_interfaces.yml"
-  when: network_vlan_interfaces | length > 0
 
 - name: Configure Bridge interfaces
   import_tasks: "bridge_interfaces.yml"
   when: network_bridge_interfaces | length > 0
 
-# - name: Restart interfaces via host reboot
-#   block:
-#     - reboot:
-#     - setup:
-#   when:
-#     - network_restart_interfaces
-#     - network_interface_restart_reboot
+- name: Restart interfaces via host reboot
+  block:
+    - reboot:
+    - setup:
+  when: >-
+    network_restart_interfaces
+    and network_interface_restart_reboot
+    and (ether_interfaces_changed + vlan_interfaces_changed + bond_interfaces_changed ) | length
 
 - name: Restart interfaces
   include_tasks: "{{ ansible_os_family }}_restart.yml"

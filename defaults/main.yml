@@ -9,7 +9,7 @@ network_allow_service_restart: true
 network_modprobe_persist: true
 
 # Remove all other settings in interfaces(5) file
-network_configured_interfaces_only: false
+network_configured_interfaces_only: true
 #network_remove_unmanaged_interfaces: false
 
 network_interface_file_prefix: "ifcfg-"

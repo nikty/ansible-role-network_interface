@@ -5,8 +5,10 @@
     src: "interface_ethernet_{{ ansible_os_family }}.j2"
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_vlan_interfaces }}"
-  when:
-    - item.present | default(True) | bool
+  register: vlan_result
+  notify: restart networking
+  # when:
+  #   - item.present | default(True) | bool
 
 
 # - name: Create the network configuration file for vlan devices
@@ -33,3 +35,13 @@
 #   when:
 #     - network_modprobe_persist
 #   notify: restart networking
+
+- name: Save changed vlan interfaces
+  set_fact:
+    vlan_interfaces_changed: >
+      {{ vlan_result.results | default([])
+           | selectattr('changed')
+           | map(attribute='item.device')
+           | list }}
+
+- debug: var=vlan_interfaces_changed

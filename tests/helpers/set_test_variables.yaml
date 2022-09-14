@@ -1,0 +1,5 @@
+- set_fact:
+    network_configured_interfaces_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | default(True, True) | bool }}"
+    network_interface_implicit_loopback: "{{ lookup('env', 'TEST_IMPLICIT_LOOPBACK') | default(True, True) | bool }}"
+    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(True, True) | bool }}"
+    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False, True) | bool }}"

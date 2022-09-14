@@ -1,14 +1,16 @@
 - hosts: all
   vars:
-    network_configured_interfaces_only: yes
-    #network_restart_interfaces: false
-    network_interface_implicit_loopback: yes
+    # network_configured_interfaces_only: yes
+    # #network_restart_interfaces: false
+    # network_interface_implicit_loopback: yes
 
-    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
-    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
+    # network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
+    # network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
 
   become: yes
   tasks:
+
+    - include_tasks: helpers/set_test_variables.yaml
 
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
@@ -38,8 +40,8 @@
     - import_role:
         name: network_interface
       vars:
-        network_configured_interfaces_only: yes
-        #network_restart_interfaces: false
+        # network_configured_interfaces_only: yes
+        # #network_restart_interfaces: false
         
         network_ether_interfaces:
           # Management
@@ -157,6 +159,25 @@
         type: veth
         state: absent
 
+    - name: Stop interfaces
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ item }}"
+        state: down
+      loop:
+        - lo
+        - veth0
+        - veth10
+        - veth11.1730
+        - veth11.934
+
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
         action: restore
+
+    - name: Restart lo interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: lo
+        state: restart
+        

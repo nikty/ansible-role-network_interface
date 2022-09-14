@@ -31,5 +31,5 @@
            | list }}
 
 - debug: var=ether_interfaces_changed
-- pause:
+
 

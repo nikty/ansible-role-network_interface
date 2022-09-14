@@ -38,3 +38,13 @@
 #   when:
 #     - network_modprobe_persist
 #   notify: restart networking
+
+- name: Save changed bonding interfaces
+  set_fact:
+    bond_interfaces_changed: >
+      {{ bond_result.results | default([])
+           | selectattr('changed')
+           | map(attribute='item.device')
+           | list }}
+
+- debug: var=bond_interfaces_changed

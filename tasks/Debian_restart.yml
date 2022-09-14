@@ -19,6 +19,7 @@
   ignore_errors: yes
 
 - pause:
+  when: lookup('env', 'TEST_PAUSE') | default(False, True) | bool
 
 - name: Cleanup Network Restart script
   file:
