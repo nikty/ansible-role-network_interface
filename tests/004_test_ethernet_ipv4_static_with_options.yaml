@@ -12,14 +12,13 @@
       long option || true
     test_option_3: "post-down echo third option is run on interface down || true"
 
-    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
-    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
-
   become: yes
   tasks:
 
     - name: "Running test [004]"
       debug: msg="[004]"
+
+    - include_tasks: helpers/set_test_variables.yaml
 
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
@@ -111,18 +110,6 @@
       include_tasks: helpers/remove_restore_default_route.yaml
       vars:
         state: present
-
-    # - name: Test removing interface configuration
-    #   import_role:
-    #     name: network_interface
-    #   become: yes
-    #   vars:
-    #     network_ether_interfaces:
-    #       - device: "{{ test_iface_name }}"
-    #         present: no
-
-    # - name: Test interface configuration is absent
-    #   include_tasks: tasks/test_interface_config_is_absent.yaml
 
     - name: Remove test interface
       include_tasks: helpers/manage_test_interface.yaml

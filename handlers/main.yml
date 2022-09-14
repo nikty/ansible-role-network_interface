@@ -1,8 +1,8 @@
 ---
 #Restart Network Interfaces (deconfigurate & reconfigurate interfaces)
-- name: restart networking
+- name: network_interface__handler_restart_networking
   include_tasks: "{{ ansible_os_family }}_restart.yml"
-  when:
-    - network_restart_interfaces | bool
-    - network_interface_restart_via_handlers | default(True) | bool
-    - not network_interface_restart_reboot
+  when: >-
+    network_restart_interfaces | bool
+    and not network_interface_restart_reboot | bool
+    and network_interface_restart_method == 'handlers'

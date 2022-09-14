@@ -1,18 +1,25 @@
 ---
 - name: Get all device names
   set_fact:
-    managed_devices: "{{ managed_devices | default([]) + [ item['device'] ] | unique }}"
+    network_interface__managed_devices: "{{ network_interface__managed_devices | default([]) + [ item['device'] ] | unique }}"
   loop: >-
     {{ network_ether_interfaces
        + network_bond_interfaces
        + network_vlan_interfaces
        + network_bridge_interfaces }}
 
-
 - name: Find interface config files to delete
   find:
     paths: "{{ net_path }}"
-    excludes: "{{ [ network_interface_file_prefix ] | product(managed_devices) | map('join', '') | list | product([ network_interface_file_postfix ]) | map('join', '') | list if managed_devices | default([]) else [] }}"
+    excludes: >
+      {{ [ network_interface_file_prefix ]
+         | product(network_interface__managed_devices)
+         | map('join', '')
+         | list
+         | product([ network_interface_file_postfix ])
+         | map('join', '')
+         | list if network_interface__managed_devices | default([])
+                else [] }}
   register: config_files_to_delete
 
 - name: Remove all interfaces config files not matching the pattern
@@ -20,4 +27,5 @@
     path: "{{ item.path }}"
     state: absent
   with_items: "{{ config_files_to_delete.files }}"
-  notify: restart networking
+  register: network_interface_register_clean_interfaces
+  notify: network_interface__handler_restart_networking

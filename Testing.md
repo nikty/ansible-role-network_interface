@@ -12,3 +12,5 @@ TEST_PAUSE=1 TEST_CONFIGURED_ONLY=1 TEST_VERIFY_PLAYBOOK=tests/100_test_implicit
 - `TEST_IMPLICIT_LOOPBACK`: whether to set `network_interface_implicit_loopback`
 - `TEST_RESTART`: whether to restart interfaces
 - `TEST_RESTART_REBOOT`: whether to reboot after network configuration is templated
+
+- `TEST_VERIFY_PLAYBOOK`: run specified playbook instead of the default one

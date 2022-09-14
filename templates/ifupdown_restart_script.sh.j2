@@ -1,5 +1,24 @@
 #!/bin/sh
 
+returncode=0
+{% for int in network_interface__all_changed_interfaces | reverse %}
+if ! ifdown -v {{ int }}; then
+    echo "Failed to bring down: {{ int }}"
+    returncode=1
+fi
+{% endfor %}
+
+sleep 1
+
+{% for int in network_interface__all_changed_interfaces %}
+if ! ifup -v {{ int }}; then
+    echo "Failed to bring up: {{ int }}"
+    returncode=1
+fi
+{% endfor %}
+
+exit $returncode
+
 # Shutdown current network configuration
 # Ethernet
 {% for int in ether_interfaces_changed %}
@@ -16,13 +35,6 @@ ifdown -v {{ int }}
 {% for int in vlan_interfaces_changed %}
 ifdown -v {{ int }}
 {% endfor %}
-# Bridge
-{% if bridge_port_result is defined and 'results' in bridge_port_result %}{% for item in bridge_port_result.results %}
-ifdown {{ item.item.1 }}
-{% endfor %}{% endif %}
-{% if bridge_result is defined and 'results' in bridge_result %}{% for item in bridge_result.results %}
-ifdown {{ item.item.device }}
-{% endfor %}{% endif %}
 
 # Short delay to prevent issues
 sleep 1
@@ -43,12 +55,5 @@ ifup -v {{ int }}
 {% for int in vlan_interfaces_changed %}
 ifup -v {{ int }}
 {% endfor %}
-# Bridge
-{% if bridge_port_result is defined and 'results' in bridge_port_result %}{% for item in bridge_port_result.results %}
-ifup {{ item.item.1 }}
-{% endfor %}{% endif %}
-{% if bridge_result is defined and 'results' in bridge_result %}{% for item in bridge_result.results %}
-ifup {{ item.item.device }}
-{% endfor %}{% endif %}
 
 

@@ -16,7 +16,7 @@
     src: ifupdown_interfaces_main.j2
     dest: /etc/network/interfaces
   when: network_configured_interfaces_only | bool
-  notify: restart networking
+  notify: network_interface__handler_restart_networking
 
   
 - name: Make sure the source include line is there in interfaces file

@@ -5,7 +5,7 @@
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_bridge_interfaces }}"
   register: bridge_result
-  notify: restart networking
+  notify: network_interface__handler_restart_networking
 
 - name: Create the network configuration file for port on the bridge devices
   template:
@@ -17,4 +17,4 @@
   when:
     - not ansible_os_family == "Debian"
   register: bridge_port_result
-  notify: restart networking
+  notify: network_interface__handler_restart_networking

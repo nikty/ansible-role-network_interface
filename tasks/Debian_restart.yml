@@ -18,13 +18,11 @@
     sh /tmp/restart_interfaces.sh
   ignore_errors: yes
 
-- pause:
-  when: lookup('env', 'TEST_PAUSE') | default(False, True) | bool
+- name: debug pause after restart script is executed
+  pause:
+  when: lookup('env', 'TEST_PAUSE') | bool
 
 - name: Cleanup Network Restart script
   file:
     path: /tmp/restart_interfaces.sh
     state: absent
-
-# - name: Reboot
-#   when: network_interface_restart_reboot

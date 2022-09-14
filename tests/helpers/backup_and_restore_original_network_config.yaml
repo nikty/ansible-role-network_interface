@@ -1,8 +1,10 @@
 - name: Save Debian network configuration
   shell: |
-    [ -d /tmp/save_network_config ] && exit
-    mkdir /tmp/save_network_config
-    cp -av /etc/network/interfaces* /tmp/save_network_config
+    backupdir="/tmp/save_network_config"
+    test -d "$backupdir" && exit
+
+    mkdir "$backupdir"
+    cp -av /etc/network/interfaces* "$backupdir"
   when:
     - action == 'backup'
     - ansible_os_family == "Debian"
@@ -10,10 +12,13 @@
 - name: Restore Debian network configuration
   shell: |
     set -e
-    [ -d /tmp/save_network_config ] || exit
+    backupdir="/tmp/save_network_config"
+    if ! test -d "$backupdir"; then
+      exit
+    fi
     rm -rf /etc/network/interfaces*
-    cp -av /tmp/save_network_config/* /etc/network/
-    rm -rf /tmp/save_network_config
+    cp -av "$backupdir/"* /etc/network/
+    rm -rf "$backupdir"
   when:
     - action == 'restore'
     - ansible_os_family == "Debian"

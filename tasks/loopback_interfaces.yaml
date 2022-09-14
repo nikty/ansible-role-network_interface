@@ -17,5 +17,5 @@
     - item.present | default(True)
     - item.device | trim != ""
   register: ether_result
-  notify: restart networking
+  notify: network_interface__handler_restart_networking
 

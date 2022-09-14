@@ -1,16 +1,6 @@
 ---
-# - name: "HACK: change `ansible_os_family` for AlmaLinux"
-#   set_fact:
-#     ansible_os_family: "RedHat"
-#   when: ansible_os_family == "AlmaLinux"
-
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
-
-# - name: Define network_pkgs.
-#   set_fact:
-#     network_pkgs: "{{ _network_pkgs }}"
-#   when: network_pkgs is not defined
 
 - name: Include specific tasks for the OS family
   include_tasks: "{{ ansible_os_family }}_initial.yml"
@@ -28,17 +18,6 @@
   import_tasks: "clean_interfaces.yml"
   when: network_configured_interfaces_only | bool
 
-
-# # Remove config files for interfaces with key "present: no"
-# - name: Remove interfaces
-#   include_tasks: "remove_interfaces.yaml"
-  
-# - name: Configure /etc/resolv.conf
-#   import_tasks: "etc_resolv_conf.yaml"
-#   when:
-#     - ansible_os_family == "Debian"
-#     - "resolvconf is not installed"
-  
 - name: Configure Ethernet interfaces
   import_tasks: "ether_interfaces.yml"
 
@@ -52,18 +31,25 @@
   import_tasks: "bridge_interfaces.yml"
   when: network_bridge_interfaces | length > 0
 
+- set_fact:
+    network_interface__all_changed_interfaces: >-
+      {{ ether_interfaces_changed
+         + vlan_interfaces_changed
+         + bond_interfaces_changed }}
+
+
 - name: Restart interfaces via host reboot
   block:
     - reboot:
     - setup:
   when: >-
-    network_restart_interfaces
-    and network_interface_restart_reboot
-    and (ether_interfaces_changed + vlan_interfaces_changed + bond_interfaces_changed ) | length
+    network_restart_interfaces | bool
+    and network_interface_restart_reboot | bool
+    and network_interface__all_changed_interfaces | length
 
-- name: Restart interfaces
+- name: Restart interfaces in last task in this role
   include_tasks: "{{ ansible_os_family }}_restart.yml"
-  when:
-    - network_restart_interfaces | bool
-    - not network_interface_restart_reboot
-    - not (network_interface_restart_via_handlers | default(True) | bool)
+  when: >-
+    network_restart_interfaces | bool
+    and not (network_interface_restart_reboot | bool)
+    and network_interface_restart_method == 'last_task'

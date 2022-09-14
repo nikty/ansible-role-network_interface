@@ -6,7 +6,7 @@
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_vlan_interfaces }}"
   register: vlan_result
-  notify: restart networking
+  notify: network_interface__handler_restart_networking
   # when:
   #   - item.present | default(True) | bool
 

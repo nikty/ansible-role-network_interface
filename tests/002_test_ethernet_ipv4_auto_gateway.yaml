@@ -1,20 +1,19 @@
 ---
-# Test configuring ethernet interface with static IPv4 and auto gateway
-
-- hosts: all
+- name: Test configuring ethernet interface with static IPv4 and auto gateway
+  hosts: all
   vars:
     test_iface_name: veth0
     test_ip_address: 192.0.2.2/24
     auto_gateway: 192.0.2.1
 
-    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
-    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
   become: yes
   
   tasks:
 
     - name: "Running test [002]"
       debug: msg="[002]"
+
+    - include_tasks: helpers/set_test_variables.yaml
 
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
@@ -27,20 +26,18 @@
         type: veth
         state: present
 
-
     - name: Test configuring static ipv4 with auto gateway
       import_role:
         name: network_interface
-      #become: yes
       vars:
         network_ether_interfaces:
           - device: "{{ test_iface_name }}"
             addresses:
               - "{{ test_ip_address }}"
             gateway4: "auto"
-        #network_restart_interfaces: false
 
-    - include_tasks: helpers/debug_pause.yaml
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
 
     - name: Remove default route
       include_tasks: helpers/remove_restore_default_route.yaml
@@ -104,18 +101,6 @@
       vars:
         state: present
 
-    # - name: Test removing interface configuration
-    #   import_role:
-    #     name: network_interface
-    #   become: yes
-    #   vars:
-    #     network_ether_interfaces:
-    #       - device: "{{ test_iface_name }}"
-    #         present: no
-
-    # - name: Test interface configuration is absent
-    #   include_tasks: tasks/test_interface_config_is_absent.yaml
-
     - name: Remove test interface
       include_tasks: helpers/manage_test_interface.yaml
       vars:
@@ -126,8 +111,4 @@
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
         action: restore
-    # - name: Restore default route
-    #   include_tasks: helpers/remove_restore_default_route.yaml
-    #   vars:
-    #     state: present
 

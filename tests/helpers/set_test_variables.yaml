@@ -3,3 +3,4 @@
     network_interface_implicit_loopback: "{{ lookup('env', 'TEST_IMPLICIT_LOOPBACK') | default(True, True) | bool }}"
     network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(True, True) | bool }}"
     network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False, True) | bool }}"
+    network_interface_restart_method: "{{ lookup('env', 'TEST_RESTART_METHOD') | default('handlers', True) }}"
