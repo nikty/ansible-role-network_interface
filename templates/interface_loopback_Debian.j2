@@ -12,8 +12,8 @@ iface {{ item.device }} inet loopback
 {{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
 {% endif -%}
 
-{{ def_iface('ethernet', 'inet', item) }}
+{{ def_iface('loopback', 'inet', item) }}
 
-{{ def_iface('ethernet', 'inet6', item) }}
+{{ def_iface('loopback', 'inet6', item) }}
 
 {%- endblock %} 

@@ -17,14 +17,13 @@
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
         action: backup
-      
 
     # import_role instead of include_role
     # to make role's variables available in this test
     - import_role:
         name: network_interface
       vars:
-        network_ether_interfaces:
+        network_loopback_interfaces:
           - device: lo
             addresses:
               - 192.0.2.1/32
@@ -36,7 +35,7 @@
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
       vars:
-        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
+        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
         compare_lines_to: |
           auto {{ test_iface_name }}
           iface {{ test_iface_name }} inet loopback

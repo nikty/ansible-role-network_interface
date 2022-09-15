@@ -21,7 +21,7 @@
     - import_role:
         name: network_interface
       vars:
-        network_ether_interfaces:
+        network_loopback_interfaces:
           - device: lo
 
     - name: debug pause after role has run

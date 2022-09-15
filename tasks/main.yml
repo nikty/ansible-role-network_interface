@@ -5,18 +5,20 @@
 - name: Include specific tasks for the OS family
   include_tasks: "{{ ansible_os_family }}_initial.yml"
 
-# Moved from 'ether_interfaces.yaml'
-- name: Add default loopback interface
+- name: Add default loopback interface interface
   set_fact:
-    network_ether_interfaces: "{{ network_ether_interfaces + [ { 'device': network_interface_loopback_name } ] }}"
-  when:
-    - network_configured_interfaces_only
-    - network_interface_implicit_loopback
-    - "network_interface_loopback_name not in network_ether_interfaces | map(attribute='device')"
+    network_loopback_interfaces: "{{ network_loopback_interfaces | default([]) + [ { 'device' : network_interface_loopback_name } ] }}"
+  when: >-
+    network_configured_interfaces_only
+    and network_interface_implicit_loopback
+    and network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device')
 
-- name: Remove not needed configuration files
+- name: Remove unmanaged configuration files
   import_tasks: "clean_interfaces.yml"
   when: network_configured_interfaces_only | bool
+
+- name: Configure Loopback interfaces
+  include_tasks: "loopback_interfaces.yaml"
 
 - name: Configure Ethernet interfaces
   import_tasks: "ether_interfaces.yml"
@@ -33,7 +35,8 @@
 
 - set_fact:
     network_interface__all_changed_interfaces: >-
-      {{ ether_interfaces_changed
+      {{ network_interface__loopback_changed
+         + ether_interfaces_changed
          + vlan_interfaces_changed
          + bond_interfaces_changed }}
 

@@ -55,7 +55,7 @@ iface {{ item.device }} {{ family }} {{ method }}
 	{% include "ifupdown_bond_options.j2" %}
       {% endif %}
       {% if item.description | default("") %}
-	{% if type != 'bond' %}
+	{% if type != 'bond' and type != 'loopback' %}
     description {{ item.description }}
 	{% else %}
     up /sbin/ip link set $IFACE alias "{{ item.description }}"

@@ -48,8 +48,25 @@ Note: The values for the list are listed in the examples below.
 
 ## Loopback interface configuration
 
-By default one loopback interface is created.
+### Linux
 
+Role assumes that for Linux there is one loopback interface - "lo".
+
+For Debians, default configuration for "lo" is created, unless `network_interface_implicit_loopback` is false:
+```
+auto lo
+iface lo inet loopback
+```
+
+If additional configuration of loopback interface is necessary, set it in `network_loopback_interfaces`:
+```
+network_loopback_interfaces:
+  - device: lo
+    addresses:
+      - 1.2.3.4
+    debian_command_options:
+      - true
+```
 
 ## Examples
 

@@ -1,16 +1,7 @@
 #jinja2: lstrip_blocks: True, trim_blocks: True
 {% extends "ifupdown_interface_base.j2" %}
 {% block main %}
-
-{%- if item.device == network_interface_loopback_name
-  and network_configured_interfaces_only
-  and network_interface_implicit_loopback %}
-auto {{ item.device }}
-iface {{ item.device }} inet loopback
-{# iface {{ item.device }} inet6 loopback #}
-{% else %}
 {{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
-{% endif -%}
 
 {{ def_iface('ethernet', 'inet', item) }}
 

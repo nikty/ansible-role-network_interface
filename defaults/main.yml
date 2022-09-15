@@ -1,5 +1,6 @@
 ---
 network_pkgs: []
+network_loopback_interfaces: []
 network_ether_interfaces: []
 network_bridge_interfaces: []
 network_bond_interfaces: []
