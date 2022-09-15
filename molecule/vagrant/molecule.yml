@@ -19,7 +19,7 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
-    converge: ../../tests/test_role_with_default_parameters.yaml
+    #converge: ../../tests/test_role_with_default_parameters.yaml
     verify: ${TEST_VERIFY_PLAYBOOK:-verify.yml}
     #verify: ../../tests/test_remove_interface_config.yaml
   # inventory:

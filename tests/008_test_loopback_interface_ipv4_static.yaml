@@ -5,16 +5,14 @@
     test_address_1: 192.0.2.1/32
     test_address_2: 192.0.2.2/32
 
-    network_configured_interfaces_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | bool }}"
-    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
-    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
-
   become: yes
 
   tasks:
 
     - name: "Running test [008]"
       debug: msg="[008]"
+
+    - include_tasks: helpers/set_test_variables.yaml
 
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
@@ -32,7 +30,8 @@
               - 192.0.2.1/32
               - 192.0.2.2/32
 
-    - include_tasks: helpers/debug_pause.yaml
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
 
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
@@ -56,6 +55,7 @@
       vars:
         interface: "{{ test_iface_name }}"
         state: restart
+      when: not network_restart_interfaces
 
     - name: Test interface has IP address
       include_tasks: tasks/assert_interface_has_ip_address.yaml
@@ -71,8 +71,6 @@
         interface: "{{ test_iface_name }}"
         state: down
         
-    - include_tasks: helpers/debug_pause.yaml
-      
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
         action: restore

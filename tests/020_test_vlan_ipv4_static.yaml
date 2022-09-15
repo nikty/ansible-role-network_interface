@@ -6,16 +6,14 @@
     test_iface_name: veth0.10
     test_address_1: 192.0.2.1/24
 
-    network_configured_interfaces_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | bool }}"
-    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
-    network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
-
   become: yes
 
   tasks:
 
     - name: "Running test [020]"
       debug: msg="[020]"
+
+    - include_tasks: helpers/set_test_variables.yaml
 
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
@@ -40,7 +38,8 @@
             #link: "{{ test_vlan_link }}"
             #id: "{{ test_vlan_id }}"
 
-    - include_tasks: helpers/debug_pause.yaml
+    - name: debug pause after the role has run
+      include_tasks: helpers/debug_pause.yaml
 
     - name: Compare templated file
       include_tasks: helpers/compare_lines.yaml
@@ -61,6 +60,7 @@
       vars:
         interface: "{{ test_iface_name }}"
         state: up
+      when: not network_restart_interfaces
 
     - name: Test interface has IP address
       include_tasks: tasks/assert_interface_has_ip_address.yaml
@@ -75,18 +75,6 @@
         interface: "{{ test_iface_name }}"
         state: down
     
-    # - name: Test removing interface configuration
-    #   import_role:
-    #     name: network_interface
-    #   vars:
-    #     network_vlan_interfaces:
-    #       - device: "{{ test_iface_name }}"
-    #         present: no
-    
-    # - name: Test interface configuration is absent
-    #   include_tasks: tasks/test_interface_config_is_absent.yaml
-    
-
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
         action: restore

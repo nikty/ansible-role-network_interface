@@ -46,6 +46,13 @@ them are as follows:
 
 Note: The values for the list are listed in the examples below.
 
+## Loopback interface configuration
+
+By default one loopback interface is created.
+
+
+## Examples
+
 ### Ethernets
 ```
 network_ether_interfaces:

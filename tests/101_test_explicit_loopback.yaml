@@ -1,10 +1,9 @@
 - hosts: all
   vars:
-    network_configured_interfaces_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | bool }}"
-    network_interface_implicit_loopback: "{{ lookup('env', 'TEST_IMPLICIT_LOOPBACK') | bool }}"
-    network_restart_interfaces: false
   become: yes
   tasks:
+
+    - include_tasks: helpers/set_test_variables.yaml
 
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:
@@ -21,19 +20,20 @@
             #   - 'down true'
               
 
-    - include_tasks: helpers/debug_pause.yaml
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
 
-    - block:
-        - name: Test
-          include_tasks: helpers/compare_lines.yaml
-          vars:
-            compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
-            compare_lines_to: |
-              auto lo
+    # - block:
+    #     - name: Test
+    #       include_tasks: helpers/compare_lines.yaml
+    #       vars:
+    #         compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
+    #         compare_lines_to: |
+    #           auto lo
               
-      when:
-        - ansible_distribution == "Debian"
-        - not (network_interface_implicit_loopback | bool )
+    #   when:
+    #     - ansible_distribution == "Debian"
+    #     - not (network_interface_implicit_loopback | bool )
       
     - include_tasks: helpers/backup_and_restore_original_network_config.yaml
       vars:

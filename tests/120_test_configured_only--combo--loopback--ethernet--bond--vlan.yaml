@@ -1,11 +1,5 @@
 - hosts: all
   vars:
-    # network_configured_interfaces_only: yes
-    # #network_restart_interfaces: false
-    # network_interface_implicit_loopback: yes
-
-    # network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default(False) | bool }}"
-    # network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False) | bool }}"
 
   become: yes
   tasks:
@@ -40,8 +34,6 @@
     - import_role:
         name: network_interface
       vars:
-        # network_configured_interfaces_only: yes
-        # #network_restart_interfaces: false
         
         network_ether_interfaces:
           # Management
@@ -96,47 +88,11 @@
                         ip rule add fwmark 0x5 table 5 || true
             description: service delayed
             
-        # network_bond_interfaces:
-          
-        #   - device: bond0
-        #     mtu: 1280
-        #     debian_command_options:
-        #       - up true
-        #       - down true
-        #     interfaces: [ veth10, veth11 ]
-        #     parameters:
-        #       mode: 802.3ad
-        #     addresses:
-        #       - 10.0.0.1/32
-        #       - 2001:db8::1/64
-            
-
-        # network_ether_interfaces:
-        #   - device: veth0
-        #     addresses:
-        #       - 172.16.191.167/25
-        #     debian_command_options:
-        #       - ip route add table 1000 default via 172.16.191.129 || true
-        #       - |
-        #         [ -z "$(ip rule ls from 172.16.191.167/25 table 1000)" ] && \
-        #         ip rule add from 172.16.191.167/25 table 1000 || true
-        #     macaddress: 00:00:00:00:06:66
-
-        #   - device: lo
-        #     debian_command_options:
-        #       - post-up ip address add dev $IFACE 172.29.250.184/32 || true
-
-        # network_vlan_interfaces:
-        #   - device: bond0.666
-        #     dhcp4: yes
-            
-
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
 
     - include_tasks: helpers/flush_handlers.yaml
       when: network_restart_interfaces
-
-    - include_tasks: helpers/debug_pause.yaml
-
 
     - name: Add test interface
       include_tasks: helpers/manage_test_interface.yaml

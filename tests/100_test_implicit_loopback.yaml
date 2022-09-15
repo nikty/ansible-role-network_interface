@@ -13,7 +13,8 @@
       import_role:
         name: network_interface
 
-    - include_tasks: helpers/debug_pause.yaml
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
 
 
     - name: Test that separate file is created for loopback device
