@@ -68,6 +68,18 @@ network_loopback_interfaces:
       - true
 ```
 
+## Restarting interfaces
+
+This role supports several ways to restart interfaces:
+
+- host reboot at the end of the role
+
+- restart via handler (default)
+
+- restart as the last task of the role
+
+
+
 ## Examples
 
 ### Ethernets

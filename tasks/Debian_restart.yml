@@ -1,18 +1,10 @@
 ---
-# Restart interfaces to load new configuration
-#
-# We had a lot of problems with lost connectivity, therefore we changed the
-# role to use a script for network reconfiguration.
-# Tested on Debian Jessie / Ubuntu 14.04 LTS and with Ethernet, Bonding Interfaces
-
 - name: Create a restart script
   template:
-    #src: restartscript.j2
     src: ifupdown_restart_script.sh.j2
     dest: /tmp/restart_interfaces.sh
     mode: 0755
 
-# Execute configuration change
 - name: Execute Network Restart
   shell: |
     sh /tmp/restart_interfaces.sh

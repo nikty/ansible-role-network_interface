@@ -40,6 +40,8 @@
          + vlan_interfaces_changed
          + bond_interfaces_changed }}
 
+- set_fact:
+    network_interface__configuration_changed: "{{ network_interface__all_changed_interfaces | length > 0 }}"
 
 - name: Restart interfaces via host reboot
   block:
@@ -48,7 +50,7 @@
   when: >-
     network_restart_interfaces | bool
     and network_interface_restart_reboot | bool
-    and network_interface__all_changed_interfaces | length
+    and network_interface__configuration_changed
 
 - name: Restart interfaces in last task in this role
   include_tasks: "{{ ansible_os_family }}_restart.yml"

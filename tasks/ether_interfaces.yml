@@ -1,17 +1,6 @@
 ---
-
-# - name: Add default loopback interface
-#   set_fact:
-#     network_ether_interfaces: "{{ network_ether_interfaces + [ { 'device': network_interface_loopback_name } ] }}"
-#   when:
-#     - network_configured_interfaces_only
-#     - network_interface_implicit_loopback
-#     - "network_interface_loopback_name not in network_ether_interfaces | map(attribute='device')"
-  
-  
 - name: Create the network configuration file for ethernet interfaces
   template:
-    #src: "ethernet_{{ ansible_os_family }}.j2"
     src: "interface_ethernet_{{ ansible_os_family }}.j2"
     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_ether_interfaces }}"

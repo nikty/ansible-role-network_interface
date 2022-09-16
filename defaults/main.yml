@@ -48,3 +48,5 @@ network_interface_expand_cidr: false
 # Whether to reboot host to restart interfaces (DANGEROUS?)
 # network_interface_restart_via: script/service/reboot
 #network_interface_restart_all: false
+
+network_interface__configuration_changed: false
