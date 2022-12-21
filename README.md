@@ -8,6 +8,7 @@ unable to recover without physical access to the machine._
 This roles enables users to configure various network components on target
 machines. The role can be used to configure:
 
+- Loopback interfaces
 - Ethernet interfaces
 - Bridge interfaces
 - Bonded interfaces
@@ -17,7 +18,7 @@ machines. The role can be used to configure:
 ## Requirements
 
 
-This role requires Ansible 1.4 or higher, and platform requirements are listed
+This role requires Ansible 2.9 or higher, and platform requirements are listed
 in the metadata file.
 
 ## Role Variables
@@ -50,7 +51,11 @@ Note: The values for the list are listed in the examples below.
 
 ### Linux
 
-Role assumes that for Linux there is one loopback interface - "lo".
+Role assumes that for Linux there exists only one loopback interface "lo":
+
+```
+From .../drivers/net/loopback.c : /* The loopback device is special. There is only one instance per network namespace. */ ```
+```
 
 For Debians, default configuration for "lo" is created, unless `network_interface_implicit_loopback` is false:
 ```
@@ -67,6 +72,8 @@ network_loopback_interfaces:
     debian_command_options:
       - true
 ```
+
+TODO: additional loopback-like devices via "dummy" driver.
 
 ## Restarting interfaces
 
