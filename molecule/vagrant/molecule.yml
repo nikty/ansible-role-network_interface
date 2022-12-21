@@ -20,8 +20,11 @@ provisioner:
   name: ansible
   playbooks:
     #converge: ../../tests/test_role_with_default_parameters.yaml
+    converge: ../shared/converge.yaml
     verify: ${TEST_VERIFY_PLAYBOOK:-verify.yml}
+    #verify: tests/test_all.yaml
     #verify: ../../tests/test_remove_interface_config.yaml
+    #side_effect: side_effect.yaml
   # inventory:
   #   links:
   #     host_vars: host_vars
@@ -29,3 +32,8 @@ provisioner:
   #   - "-vvvv"
 verifier:
   name: ansible
+# scenario:
+#   test_sequence:
+#     - side_effect
+#     - converge
+#     - converge

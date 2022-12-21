@@ -1,0 +1,8 @@
+- name: Get contents of {{ file }}
+  slurp:
+    src: "{{ file }}"
+  register: slurped
+
+- assert:
+    that: >-
+      (slurped.content | b64decode) is match( '{{ regexp }}' )

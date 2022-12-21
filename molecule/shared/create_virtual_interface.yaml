@@ -1,0 +1,11 @@
+- name: Create veth interface {{ item }}
+  shell: |
+    ip link del {{ item }} 
+    ip link add {{ item }} type {{ type }} peer p-{{ item }}
+    ip link set p-{{ item }} up
+  when: type == "veth" and state | default('present') == "present"
+
+# - name: Remove veth interface {{ item }}
+#   command: ip link del {{ item }}
+#   when: type == "veth" and state | default('present') == "absent"
+

@@ -1,0 +1,12 @@
+- name: Test route
+  shell: |
+    ip route ls {{ dst }} via {{ gateway }}
+  when: >-
+    ansible_system == "Linux"
+  register: p
+
+- assert:
+    that: p.stdout != ""
+  when: >-
+    ansible_system == 'Linux'
+    and state | default('present') == 'present'

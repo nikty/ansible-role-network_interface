@@ -1,0 +1,9 @@
+- command: ip route del {{ dst }}
+  when: >-
+    ansible_system == "Linux"
+    and state | default('present') == 'absent'
+
+- command: ip route add {{ dst }} via {{ gateway }}
+  when: >-
+    ansible_system == "Linux"
+    and state | default('present') == 'present'

@@ -2,12 +2,30 @@
 # - interface: interface name to test
 # - state: 'down' or 'up'
 
+# This tests the interface RFC2863 operational state.
+
+# What:		/sys/class/net/<iface>/operstate
+# Date:		March 2006
+# KernelVersion:	2.6.17
+# Contact:	netdev@vger.kernel.org
+# Description:
+# 		Indicates the interface RFC2863 operational state as a string.
+
+# 		Possible values are:
+
+# 		"unknown", "notpresent", "down", "lowerlayerdown", "testing",
+# 		"dormant", "up".
+
 - name: Test interface is up
   shell: ip link ls {{ interface }} | grep -q -i 'state up'
   changed_when: no
-  when: state == 'up'
+  when: >-
+    state == 'up'
+    and ansible_system == 'Linux'
 
 - name: Test interfaces is down
   shell: ip link ls {{ interface }} | grep -q -i 'state down'
   changed_when: no
-  when: state == 'down'
+  when: >-
+    state == 'down'
+    and ansible_system == 'Linux'

@@ -1,5 +1,5 @@
 ---
-#Restart Network Interfaces (deconfigurate & reconfigurate interfaces)
+# Restart Network Interfaces (deconfigurate & reconfigurate interfaces)
 - name: network_interface__handler_restart_networking
   include_tasks: "{{ ansible_os_family }}_restart.yml"
   when: >-
