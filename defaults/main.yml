@@ -23,7 +23,12 @@ network_interface_assume_dhcp: false
 
 # Loopback interface options
 
-network_interface_loopback_name: lo
+_network_interface_loopback_name:
+  FreeBSD: lo0
+  Linux: lo
+  default: lo
+
+network_interface_loopback_name: "{{ _network_interface_loopback_name[ ansible_system ] | default( _network_interface_loopback_name[ 'default' ] ) }}"
 # Configure loopback interface even if it's not supplied in role parameters
 network_interface_implicit_loopback: true
 
