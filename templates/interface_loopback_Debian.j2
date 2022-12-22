@@ -3,7 +3,7 @@
 {% block main %}
 
 {%- if item.device == network_interface_loopback_name
-  and network_configured_interfaces_only
+  and network_interface_configured_only
   and network_interface_implicit_loopback %}
 auto {{ item.device }}
 iface {{ item.device }} inet loopback

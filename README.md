@@ -37,7 +37,7 @@ them are as follows:
 | `network_check_packages` | No | `true` | Install packages listed in network_pkgs. |
 | `network_allow_service_restart` | No | `true` | Whether interfaces/networking should get reconfigured and restarted. |
 | `network_modprobe_persist` | No | `true` | Persisting module loading. |
-| `network_configured_interfaces_only` | No | `false` | Removes interfaces not configured over this role entirely when enabled. |
+| `network_interface_configured_only` | No | `true` | Removes interfaces not configured over this role entirely when enabled. |
 | `network_interface_implicit_loopback` | No | `true` | Whether to create configuration for loopback interface, see *Loopback interface configuration* |
 | `network_interface_loopback_name` | No | `lo` | Default name of the loopback interface |
 | `network_interface_file_prefix` | No | `ifcfg-` | The prefix for interface configuration files. |

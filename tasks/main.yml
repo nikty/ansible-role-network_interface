@@ -9,13 +9,13 @@
   set_fact:
     network_loopback_interfaces: "{{ network_loopback_interfaces | default([]) + [ { 'device' : network_interface_loopback_name } ] }}"
   when: >-
-    network_configured_interfaces_only
+    network_interface_configured_only
     and network_interface_implicit_loopback
     and network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device')
 
 - name: Remove unmanaged configuration files
   import_tasks: "clean_interfaces.yml"
-  when: network_configured_interfaces_only | bool
+  when: network_interface_configured_only | bool
 
 - name: Configure Loopback interfaces
   include_tasks: "loopback_interfaces.yaml"

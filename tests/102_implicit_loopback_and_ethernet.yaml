@@ -46,7 +46,7 @@
               
       when:
         - ansible_distribution == "Debian"
-        - network_configured_interfaces_only | bool
+        - network_interface_configured_only | bool
         - network_interface_implicit_loopback | bool
 
     - include_tasks: helpers/compare_lines.yaml

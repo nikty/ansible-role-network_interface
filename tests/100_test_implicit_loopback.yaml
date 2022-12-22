@@ -26,16 +26,16 @@
           iface lo inet loopback
       when:
         - ansible_distribution == "Debian"
-        - network_configured_interfaces_only | bool
+        - network_interface_configured_only | bool
         - network_interface_implicit_loopback | bool
 
-    - name: Test that separate file is not created when /network_configured_interfaces_only is False/
+    - name: Test that separate file is not created when /network_interface_configured_only is False/
       stat:
         path: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
       register: p
       when:
         - ansible_distribution == "Debian"
-        - not (network_configured_interfaces_only | bool)
+        - not (network_interface_configured_only | bool)
       failed_when: p.stat.exists
 
     - include_tasks: helpers/flush_handlers.yaml

@@ -1,4 +1,4 @@
-network_configured_interfaces_only: false
+network_interface_configured_only: false
 network_ether_interfaces:
   - device: veth0
     addresses:

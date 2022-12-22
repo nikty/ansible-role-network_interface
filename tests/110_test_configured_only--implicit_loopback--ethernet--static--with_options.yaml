@@ -1,6 +1,6 @@
 - hosts: all
   vars:
-    network_configured_interfaces_only: yes
+    network_interface_configured_only: yes
     network_restart_interfaces: false
     network_interface_implicit_loopback: yes
 
