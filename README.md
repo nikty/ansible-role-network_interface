@@ -47,6 +47,24 @@ them are as follows:
 
 Note: The values for the list are listed in the examples below.
 
+## Configuration backends
+
+TODO
+
+Variable `network_interface_configuration_backend` allows to force specific configuration backend.
+
+Supported backends are:
+- ifupdown (Debian, default)
+- netplan
+- rc (FreeBSD, default)
+- systemd-networkd
+- ifupdown2
+
+## Single configuration file vs multiple configuration files
+
+`network_interface_single_file`: boolean
+
+
 ## Loopback interface configuration
 
 ### Linux

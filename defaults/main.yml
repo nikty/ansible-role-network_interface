@@ -55,3 +55,10 @@ network_interface_expand_cidr: false
 #network_interface_restart_all: false
 
 #network_interface__configuration_changed: false
+
+_network_interface_configuration_backend:
+  Debian: ifupdown
+  Ubuntu: netplan
+  FreeBSD: rc
+
+network_interface_configuration_backend: "{{ _network_interface_configuration_backend[ ansible_system ] | default( _network_interface_configuration_backend[ ansible_os_family ] ) }}"

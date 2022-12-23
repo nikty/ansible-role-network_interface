@@ -29,7 +29,7 @@
         - network_interface_configured_only | bool
         - network_interface_implicit_loopback | bool
 
-    - name: Test that separate file is not created when /network_interface_configured_only is False/
+    - name: Test that separate file is not created when __network_interface_configured_only__ is False
       stat:
         path: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
       register: p

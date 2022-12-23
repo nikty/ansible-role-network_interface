@@ -6,3 +6,8 @@ env:
   RUNLEVEL: 1
 
 _config_files: []
+
+network_interface_backend_packages:
+  ifupdown:
+    - ifupdown
+    
