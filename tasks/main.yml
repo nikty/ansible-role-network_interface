@@ -1,47 +1,10 @@
 ---
-- name: Add the OS specific varibles
-  include_vars: "{{ ansible_os_family }}.yml"
-
-- name: Include specific tasks for the OS family
-  include_tasks: "{{ ansible_os_family }}_initial.yml"
-
-- name: Add default loopback interface interface
-  set_fact:
-    network_loopback_interfaces: "{{ network_loopback_interfaces | default([]) + [ { 'device' : network_interface_loopback_name } ] }}"
-  when: >-
-    network_interface_configured_only
-    and network_interface_implicit_loopback
-    and network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device')
-
-- name: Remove unmanaged configuration files
-  import_tasks: "clean_interfaces.yml"
-  when: network_interface_configured_only | bool
-
-- name: Configure Loopback interfaces
-  include_tasks: "loopback_interfaces.yaml"
-
-- name: Configure Ethernet interfaces
-  import_tasks: "ether_interfaces.yml"
-
-- name: Configure Bond interfaces
-  import_tasks: "bond_interfaces.yml"
-
-- name: Configure VLAN interfaces
-  import_tasks: "vlan_interfaces.yml"
-
-- name: Configure Bridge interfaces
-  import_tasks: "bridge_interfaces.yml"
-  when: network_bridge_interfaces | length > 0
-
 - set_fact:
-    network_interface__all_changed_interfaces: >-
-      {{ network_interface__loopback_changed
-         + ether_interfaces_changed
-         + vlan_interfaces_changed
-         + bond_interfaces_changed }}
+    network_interface_packages: "{{ network_interface_packages | default([]) + network_interface_backend_packages[ network_interface_configuration_backend ] }}"
 
-- set_fact:
-    network_interface__configuration_changed: "{{ network_interface__all_changed_interfaces | length > 0 }}"
+  
+- name: Run tasks for the selected backend
+  include_tasks: "{{ network_interface_configuration_backend }}.yaml"
 
 - name: Restart interfaces via host reboot
   block:
