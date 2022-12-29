@@ -62,3 +62,5 @@ _network_interface_configuration_backend:
   FreeBSD: rc
 
 network_interface_configuration_backend: "{{ _network_interface_configuration_backend[ ansible_system ] | default( _network_interface_configuration_backend[ ansible_os_family ] ) }}"
+
+network_interface_single_configuration_file: false

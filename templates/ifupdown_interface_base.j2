@@ -5,15 +5,15 @@
 #}
 {%- if (item.addresses | default([]) | ipv4)
   or (item.dhcp4 is defined and item.dhcp4 )
-  %}
-  {% set default_family = 'inet' %}
-{% elif (item.addresses | default([]) | ipv6 ) %}
-  {% set default_family = 'inet6' %}
-{% else %}
-  {% set default_family = 'inet' %}
-{% endif %}
+  -%}
+  {%- set default_family = 'inet' -%}
+{%- elif (item.addresses | default([]) | ipv6 ) -%}
+  {%- set default_family = 'inet6' -%}
+{%- else -%}
+  {%- set default_family = 'inet' -%}
+{%- endif -%}
 
-{%- from "ifupdown_macros.j2" import def_iface with context %}
+{%- from "ifupdown_macros.j2" import def_iface with context -%}
 
 {%- block main %}{% endblock %}
 

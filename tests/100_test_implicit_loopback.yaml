@@ -5,10 +5,6 @@
 
     - include_tasks: helpers/set_test_variables.yaml
 
-    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
-      vars:
-        action: backup
-
     - name: Test configuring network with only implicit loopback
       import_role:
         name: network_interface
@@ -20,22 +16,22 @@
     - name: Test that separate file is created for loopback device
       include_tasks: helpers/compare_lines.yaml
       vars:
-        compare_lines_from_file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
+        compare_lines_from_file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
         compare_lines_to: |
           auto lo
           iface lo inet loopback
       when:
-        - ansible_distribution == "Debian"
-        - network_interface_configured_only | bool
+        - not network_interface_single_configuration_file
+        - network_interface_configuration_backend == "ifupdown"
         - network_interface_implicit_loopback | bool
 
-    - name: Test that separate file is not created when __network_interface_configured_only__ is False
+    - name: Test that separate file is not created when in single configuration file mode
       stat:
-        path: "{{ net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
+        path: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ network_interface_loopback_name }}{{ network_interface_file_postfix }}"
       register: p
       when:
-        - ansible_distribution == "Debian"
-        - not (network_interface_configured_only | bool)
+        - network_interface_configuration_backend == "ifupdown"
+        - network_interface_single_configuration_file
       failed_when: p.stat.exists
 
     - include_tasks: helpers/flush_handlers.yaml

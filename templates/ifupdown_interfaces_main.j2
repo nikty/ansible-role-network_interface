@@ -1,7 +1,16 @@
+#jinja2: lstrip_blocks: True, trim_blocks: True
 # {{ ansible_managed }}
-{# {% if network_interface_implicit_loopback %} #}
-{# auto {{ network_interface_loopback_name }} #}
-{# iface {{ network_interface_loopback_name }} inet loopback   #}
-{# {% endif %} #}
 
-source {{ net_path }}/*
+{% if network_interface_single_configuration_file | default(False) %}
+{%   if network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device') %}
+{%     set _ = network_loopback_interfaces.append( { 'device' : network_interface_loopback_name } ) %}
+{%   endif %}
+{%   for item in network_loopback_interfaces %}
+{%     include "interface_loopback_Debian.j2" %}
+{%   endfor %}
+{%   for item in network_ether_interfaces %}
+{%     include "interface_ethernet_Debian.j2" %}
+{%   endfor %}
+{% else %}  
+source {{ network_interface_ifupdown_net_path }}/*
+{% endif %}

@@ -1,0 +1,26 @@
+- name: Add implicit loopback interface
+  set_fact:
+    network_loopback_interfaces: "{{ network_loopback_interfaces | default([]) + [ { 'device' : network_interface_loopback_name } ] }}"
+  when: >-
+    network_interface_implicit_loopback | bool
+    and network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device')
+
+- name: Create the network configuration files for loopback interfaces
+  template:
+    src: "interface_loopback_{{ ansible_os_family }}.j2"
+    dest: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
+  loop: "{{ network_loopback_interfaces }}"
+  when:
+    - not network_interface_single_configuration_file
+  register: network_interface__loopback_result
+  notify: network_interface__handler_restart_networking
+
+- name: Save changed loopback interfaces
+  set_fact:
+    network_interface__loopback_changed: >-
+      {{ network_interface__loopback_result.results | default([])
+         | selectattr('changed')
+         | map(attribute='item.device')
+         | list }}
+
+- debug: var=network_interface__loopback_changed

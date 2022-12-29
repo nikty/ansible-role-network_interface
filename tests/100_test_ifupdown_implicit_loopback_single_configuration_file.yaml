@@ -1,21 +1,22 @@
-- import_playbook: ../../shared/converge.yaml
-
 - hosts: all
   vars:
-    network_loopback_interfaces:
-      - device: lo
+    network_interface_single_configuration_file: yes
   become: yes
   tasks:
 
-    - include_tasks: helpers/set_test_variables.yaml
+    #- include_tasks: helpers/set_test_variables.yaml
 
-    - name: Configure loopback only
+    # - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+    #   vars:
+    #     action: backup
+
+    - name: Test configuring network with only implicit loopback
       import_role:
         name: network_interface
-              
 
-    - name: debug pause after role has run
+    - name: Debug pause after role has run
       include_tasks: helpers/debug_pause.yaml
+
 
     - name: Test that separate file is created for loopback device
       include_tasks: helpers/compare_lines.yaml
@@ -37,3 +38,17 @@
         - network_interface_configuration_backend == "ifupdown"
         - network_interface_single_configuration_file
       failed_when: p.stat.exists
+
+    - include_tasks: helpers/flush_handlers.yaml
+
+    - include_tasks: helpers/debug_pause.yaml
+
+    - include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ network_interface_loopback_name }}"
+        state: restart
+      
+      
+    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
+      vars:
+        action: restore

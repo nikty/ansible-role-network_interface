@@ -7,7 +7,12 @@ env:
 
 _config_files: []
 
-network_interface_backend_packages:
-  ifupdown:
+_network_interface_ifupdown_packages:
+  default:
     - ifupdown
-    
+
+network_interface_ifupdown_packages: "{{ _network_interface_ifupdown_packages[ ansible_os_family ] | default( _network_interface_ifupdown_packages['default'] ) }}"
+
+network_interface_ifupdown_net_path: "/etc/network/interfaces.d"
+
+

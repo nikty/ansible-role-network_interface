@@ -29,27 +29,27 @@ them are as follows:
 
 | Variable | Required | Default | Comments |
 |-------------------------------------|----------|-----------|---------|
-| `network_pkgs` | No | `[]` | Typically needed packages like selinux, bridge-utils, ifenslave and iproute |
-| `network_ether_interfaces` | No | `[]` | The list of ethernet interfaces to be added to the system. |
-| `network_bridge_interfaces` | No | `[]` | The list of bridge interfaces to be added to the system. |
-| `network_bond_interfaces` | No | `[]` | The list of bonded interfaces to be added to the system. |
-| `network_vlan_interfaces` | No | `[]` | The list of vlan interfaces to be added to the system. |
-| `network_check_packages` | No | `true` | Install packages listed in network_pkgs. |
-| `network_allow_service_restart` | No | `true` | Whether interfaces/networking should get reconfigured and restarted. |
-| `network_modprobe_persist` | No | `true` | Persisting module loading. |
-| `network_interface_configured_only` | No | `true` | Removes interfaces not configured over this role entirely when enabled. |
-| `network_interface_implicit_loopback` | No | `true` | Whether to create configuration for loopback interface, see *Loopback interface configuration* |
-| `network_interface_loopback_name` | No | `lo` | Default name of the loopback interface |
-| `network_interface_file_prefix` | No | `ifcfg-` | The prefix for interface configuration files. |
-| `network_interface_file_postfix` | No | `` | The postfix for interface configuration files. |
-| `network_restart_interfaces` | No | `true` | Whether to restart interfaces. Replaces `network_allow_service_restart`. |
-| `network_interface_restart_reboot` | No | `false` | Whether to reboot host to apply interface configuration |
+| `network_pkgs`			   | No | `[]`        | Typically needed packages like selinux, bridge-utils, ifenslave and iproute |
+| `network_ether_interfaces`	       	   | No | `[]`	      | The list of ethernet interfaces to be added to the system. |
+| `network_bridge_interfaces`	       	   | No | `[]`	      | The list of bridge interfaces to be added to the system. |
+| `network_bond_interfaces`	           | No | `[]`	      | The list of bonded interfaces to be added to the system. |
+| `network_vlan_interfaces`                | No | `[]`	      | The list of vlan interfaces to be added to the system. |
+| `network_check_packages`                 | No | `true`      | Install packages listed in network_pkgs. |
+| `network_allow_service_restart`          | No | `true`      | Whether interfaces/networking should get reconfigured and restarted. |
+| `network_modprobe_persist`	       	   | No | `true`      | Persisting module loading. |
+| `network_interface_configured_only` 	   | No | `true`      | Removes interfaces not configured over this role entirely when enabled. |
+| `network_interface_implicit_loopback`    | No | `true`      | Whether to create configuration for loopback interface, see *Loopback interface configuration* |
+| `network_interface_loopback_name` 	   | No | `lo`	      | Default name of the loopback interface |
+| `network_interface_file_prefix` 	   | No | `ifcfg-`    | The prefix for interface configuration files. |
+| `network_interface_file_postfix` 	   | No | ``	      | The postfix for interface configuration files. |
+| `network_restart_interfaces` 		   | No | `true`      | Whether to restart interfaces. Replaces `network_allow_service_restart`. |
+| `network_interface_restart_reboot` 	   | No | `false`     | Whether to reboot host to apply interface configuration |
 
 Note: The values for the list are listed in the examples below.
 
 ## Configuration backends
 
-TODO
+This role aims to be configuration backend-agnostic.
 
 Variable `network_interface_configuration_backend` allows to force specific configuration backend.
 
@@ -62,7 +62,9 @@ Supported backends are:
 
 ## Single configuration file vs multiple configuration files
 
-`network_interface_single_file`: boolean
+Where supported, it is possible to create single configuration file with all network settings, e.g. `/etc/network/interfaces` for *ifupdown*.
+
+`network_interface_single_configuration_file`: boolean
 
 
 ## Loopback interface configuration
@@ -156,9 +158,12 @@ network_ether_interfaces:
 ### VLANs
 ```
 network_vlan_interfaces:
-  - device: eth0.10 # TODO: can't have arbitrary name
+  - device: vlan10 # TODO: can't have arbitrary name
     link: eth1 # TODO: currently not used
     id: 10 # TODO: currently not used
+  # - device: eth1.10
+  #   link: eth1
+  #   id: 10
 ```
 
 ### Bonds

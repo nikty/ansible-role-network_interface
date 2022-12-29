@@ -1,4 +1,6 @@
 ---
+- import_playbook: ../../shared/converge.yaml
+
 - name: Test configuring ethernet interface with static IPv4 with multiple addresses
   hosts: all
   vars:
@@ -7,6 +9,9 @@
       - 192.0.2.2/24
       - 192.0.2.3/24
       - 192.0.2.4/24
+    network_ether_interfaces:
+      - device: "{{ test_iface_name }}"
+        addresses: "{{ test_ip_addresses }}"
 
   become: yes
   tasks:
@@ -16,23 +21,8 @@
 
     - include_tasks: helpers/set_test_variables.yaml
 
-    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
-      vars:
-        action: backup
-
-    - name: Add test interface
-      include_tasks: helpers/manage_test_interface.yaml
-      vars:
-        interface: "{{ test_iface_name }}"
-        type: veth
-        state: present
-      
     - import_role:
         name: network_interface
-      vars:
-        network_ether_interfaces:
-          - device: "{{ test_iface_name }}"
-            addresses: "{{ test_ip_addresses }}"
 
     - include_tasks: helpers/flush_handlers.yaml
 
@@ -70,14 +60,3 @@
         interface: "{{ test_iface_name }}"
         state: down
 
-    - name: Remove test interface
-      include_tasks: helpers/manage_test_interface.yaml
-      vars:
-        interface: "{{ test_iface_name }}"
-        type: veth
-        state: absent
-
-    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
-      vars:
-        action: restore
-        

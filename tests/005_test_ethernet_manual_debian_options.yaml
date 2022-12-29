@@ -1,5 +1,6 @@
 ---
-
+- import_playbook: ../../shared/converge.yaml
+  
 - hosts: all
   vars:
     test_iface_name: veth0
@@ -26,20 +27,9 @@
 
     - include_tasks: helpers/set_test_variables.yaml
 
-    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
-      vars:
-        action: backup
+    # - meta: end_play
+    #   when: ansible_distribution != "Debian"
 
-    - meta: end_play
-      when: ansible_distribution != "Debian"
-
-    - name: Add test interface
-      include_tasks: helpers/manage_test_interface.yaml
-      vars:
-        interface: "{{ test_iface_name }}"
-        type: veth
-        state: present
-      
     - name: Test configuring static ipv4 with default gateway
       import_role:
         name: network_interface
@@ -51,7 +41,6 @@
               - "{{ test_option_2 }}"
               - "{{ test_option_3 }}"
               - "{{ test_option_4 }}"
-      when: ansible_distribution == "Debian"
 
     - include_tasks: helpers/flush_handlers.yaml
       
@@ -67,7 +56,9 @@
           {% for opt in [ test_option_1, test_option_2, test_option_3, test_option_4 ] %}
           {{ opt }}
           {% endfor %}
-      when: ansible_distribution == "Debian"
+      when: >-
+        network_interface_configuration_backend == 'ifupdown'
+        and not network_interface_single_configuration_file
 
     - name: Start interface
       include_tasks: tasks/system_interface_control.yaml
@@ -109,13 +100,3 @@
       register: p
       failed_when: p.stdout != "post-down third"
 
-    - name: Remove test interface
-      include_tasks: helpers/manage_test_interface.yaml
-      vars:
-        interface: "{{ test_iface_name }}"
-        type: veth
-        state: absent
-      
-    - include_tasks: helpers/backup_and_restore_original_network_config.yaml
-      vars:
-        action: restore

@@ -8,13 +8,18 @@ TEST_PAUSE=1 TEST_CONFIGURED_ONLY=1 TEST_VERIFY_PLAYBOOK=tests/100_test_implicit
 ## Environment variables
 
 - `TEST_PAUSE`: whether to pause playbook (e.g. to manually inspect configuration after role is applied)
+
 - `TEST_CONFIGURED_ONLY`: set `network_interface_configured_only`
+
 - `TEST_IMPLICIT_LOOPBACK`: set `network_interface_implicit_loopback`
+
 - `TEST_RESTART`: whether to restart interfaces
+
 - `TEST_RESTART_REBOOT`: whether to reboot after network configuration is templated
 
 - `TEST_VERIFY_PLAYBOOK`: run specified playbook instead of the default one
 
+- `TEST_SINGLE_CONFIG_FILE`: set `network_interface_single_configuration_file`
 
 ## Test harness
 
@@ -41,6 +46,7 @@ TEST_PAUSE=1 TEST_CONFIGURED_ONLY=1 TEST_VERIFY_PLAYBOOK=tests/100_test_implicit
   Vars:
     - dst: address
     - gateway: gateway address
+    - state: present (default), absent
 
 - tests/helpers/manage_route.yaml - Add/remove routes
   Vars:

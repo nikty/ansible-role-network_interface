@@ -41,10 +41,11 @@
 
     - include_tasks: helpers/test_file_contents.yaml
       vars:
-        file: "{{ net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
+        file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
         regexp: '\s*auto {{ test_iface_name }}\s*\n\s*iface {{ test_iface_name }} inet static\s*\n\s*address {{ test_ip_address | regex_escape()}}\s*\n\s*gateway {{ test_ip_gateway4 | regex_escape() }}\s*$'
       when: >-
-        ansible_os_family == 'Debian'
+        network_interface_configuration_backend == 'ifupdown'
+        and not network_interface_single_configuration_file | bool
 
     # - name: Compare templated file
     #   include_tasks: helpers/compare_lines.yaml
