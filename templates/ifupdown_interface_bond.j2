@@ -2,9 +2,6 @@
 {% block main %}
 
 {{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
-
 {{ def_iface('bond', 'inet', item) }}
-
 {{ def_iface('bond', 'inet6', item) }}  
-
 {% endblock %}

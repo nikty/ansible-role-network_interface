@@ -13,7 +13,6 @@
     mtu {{ item.mtu }}
   {% endif %}
   {{ macro_macaddress() }}
-
 {% endmacro %}
 
 {% macro macro_macaddress() %}
@@ -47,16 +46,8 @@
       {%- set method = 'manual' -%}
     {%- endif -%}
   {%- endif -%}
-
-{#
-{%    if type == 'vlan' and item.link is defined and item.link is not none and item.id is defined and item.id is not none %}
-{%      set method = 'manual' %}
-{%    endif %}
-#}
-
   {%- if method is defined %}
 iface {{ item.device }} {{ family }} {{ method }}
-
 {%    if type == 'vlan' and item.link is defined and item.id is defined and (item.device != "{}.{}".format(item.link, item.id)) %}
     pre-up /bin/ip link add link {{ item.link }} name {{ item.device }} type vlan id {{ item.id }}
     down /bin/ip link del name {{ item.device }}
@@ -64,7 +55,6 @@ iface {{ item.device }} {{ family }} {{ method }}
     up /bin/ip link set {{ item.link }} up
 {%      endif %}#}
 {%    endif %}
-
     {%- if family == 'inet' -%}
       {%- include "ifupdown_ipv4_options.j2" %}
     {%- endif -%}
@@ -73,11 +63,10 @@ iface {{ item.device }} {{ family }} {{ method }}
 
       {%- include "ifupdown_ipv6_options.j2" -%}
     {%- endif %}
-
 {% if default_family == family -%}
     {{ common_options() }}
-      {% if type == 'bond' %}
-	{% include "ifupdown_bond_options.j2" %}
+{% if type == 'bond' %}
+{% include "ifupdown_bond_options.j2" %}
       {% endif %}
       {% if item.description | default("") %}
 	{% if type != 'bond' and type != 'loopback' %}
@@ -86,7 +75,6 @@ iface {{ item.device }} {{ family }} {{ method }}
     up /sbin/ip link set $IFACE alias "{{ item.description }}"
 	{% endif %}
       {% endif %}  
-
     {% endif %}
-  {% endif -%}
-{% endmacro -%}
+  {% endif %}
+{% endmacro %}
