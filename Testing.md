@@ -1,25 +1,33 @@
+# Testing
+
 Testing is done via molecule.
 
-
+To run all tests execute:
 ```
-TEST_PAUSE=1 TEST_CONFIGURED_ONLY=1 TEST_VERIFY_PLAYBOOK=tests/100_test_implicit_loopback_only.yaml  mol verify -s vagrant
+mol verify -s vagrant
+```
+
+To run single test set `TEST_VERIFY_PLAYBOOK` variable:
+```
+TEST_VERIFY_PLAYBOOK=tests/001_test_ethernet_ipv4_static.yaml  mol verify -s vagrant
 ```
 
 ## Environment variables
 
-- `TEST_PAUSE`: whether to pause playbook (e.g. to manually inspect configuration after role is applied)
+Several environment variables can be used to control tests.
 
-- `TEST_CONFIGURED_ONLY`: set `network_interface_configured_only`
+- `TEST_PAUSE`: whether to run pause tasks in tests (for example, to manually inspect system state at a certain point)
 
-- `TEST_IMPLICIT_LOOPBACK`: set `network_interface_implicit_loopback`
+- `TEST_IMPLICIT_LOOPBACK`: whether to configure loopback device if it's not explicitly mentioned in configuration (sets `network_interface_implicit_loopback`)
 
-- `TEST_RESTART`: whether to restart interfaces
+- `TEST_RESTART`: whether to restart interfaces (sets `network_restart_interfaces`)
 
-- `TEST_RESTART_REBOOT`: whether to reboot after network configuration is templated
+- `TEST_SINGLE_CONFIG_FILE`: set `network_interface_single_configuration_file`
+
+Environment variables for molecule:
 
 - `TEST_VERIFY_PLAYBOOK`: run specified playbook instead of the default one
 
-- `TEST_SINGLE_CONFIG_FILE`: set `network_interface_single_configuration_file`
 
 ## Test harness
 
@@ -58,3 +66,17 @@ TEST_PAUSE=1 TEST_CONFIGURED_ONLY=1 TEST_VERIFY_PLAYBOOK=tests/100_test_implicit
   Vars:
     - file: file path
     - regexp: pattern to match
+
+- tests/helpers/flush_handlers.yaml - Flush handlers
+
+- tests/helpers/debug_pause.yaml - Pause task, respects environment variable `TEST_PAUSE`.
+
+- tests/helpers/compare_lines.yaml - Compare text line by line
+
+Vars:
+    - compare_lines_from: string
+    - compare_lines_from_file: path to remote file
+    - compare_lines_to: string
+    - compare_lines_to_file: path to remote file
+    - compare_lines_ignore_blank_lines: boolean - whether blank lines matter. Default: **true**
+    - compare_lines_trim_whitespace: boolean - ignore whitespace at the beginning and ending of lines. Default: **true**

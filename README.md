@@ -35,14 +35,14 @@ them are as follows:
 | `network_bond_interfaces`	           | No | `[]`	      | The list of bonded interfaces to be added to the system. |
 | `network_vlan_interfaces`                | No | `[]`	      | The list of vlan interfaces to be added to the system. |
 | `network_check_packages`                 | No | `true`      | Install packages listed in network_pkgs. |
-| `network_allow_service_restart`          | No | `true`      | Whether interfaces/networking should get reconfigured and restarted. |
 | `network_modprobe_persist`	       	   | No | `true`      | Persisting module loading. |
 | `network_interface_configured_only` 	   | No | `true`      | Removes interfaces not configured over this role entirely when enabled. |
 | `network_interface_implicit_loopback`    | No | `true`      | Whether to create configuration for loopback interface, see *Loopback interface configuration* |
 | `network_interface_loopback_name` 	   | No | `lo`	      | Default name of the loopback interface |
 | `network_interface_file_prefix` 	   | No | `ifcfg-`    | The prefix for interface configuration files. |
 | `network_interface_file_postfix` 	   | No | ``	      | The postfix for interface configuration files. |
-| `network_restart_interfaces` 		   | No | `true`      | Whether to restart interfaces. Replaces `network_allow_service_restart`. |
+| `network_restart_interfaces` 		   | No | `true`      | Whether to restart interfaces. |
+| `network_interface_restart_method`	   | No | `handlers`  | When to restart interfaces. `handlers`, `last_task` |
 | `network_interface_restart_reboot` 	   | No | `false`     | Whether to reboot host to apply interface configuration |
 
 Note: The values for the list are listed in the examples below.
@@ -97,12 +97,11 @@ TODO: additional loopback-like devices via "dummy" driver.
 
 ## Restarting interfaces
 
+Controlled by variable `network_restart_interfaces`.
+
 This role supports several ways to restart interfaces:
-
-- host reboot at the end of the role
-
 - restart via handler (default)
-
+- host reboot at the end of the role
 - restart as the last task of the role
 
 

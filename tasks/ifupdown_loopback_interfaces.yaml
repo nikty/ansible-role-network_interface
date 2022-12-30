@@ -7,7 +7,7 @@
 
 - name: Create the network configuration files for loopback interfaces
   template:
-    src: "interface_loopback_{{ ansible_os_family }}.j2"
+    src: "ifupdown_interface_loopback.j2"
     dest: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
   loop: "{{ network_loopback_interfaces }}"
   when:

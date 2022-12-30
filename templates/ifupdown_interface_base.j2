@@ -1,3 +1,6 @@
+{% if not network_interface_single_configuration_file %}
+# {{ ansible_managed }}
+{% endif %}
 {#
 ## Decide where to put additional condiguration,
 ## like "debian_command_options" or bonding options,

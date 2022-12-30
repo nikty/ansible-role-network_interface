@@ -14,7 +14,6 @@
         addresses:
           - "{{ test_ip_address }}"
         gateway4: "{{ test_ip_gateway4 }}"
-        #network_restart_interfaces: "{{ test_restart_interfaces }}"
 
   become: yes
   tasks:
@@ -42,23 +41,46 @@
     - include_tasks: helpers/test_file_contents.yaml
       vars:
         file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
-        regexp: '\s*auto {{ test_iface_name }}\s*\n\s*iface {{ test_iface_name }} inet static\s*\n\s*address {{ test_ip_address | regex_escape()}}\s*\n\s*gateway {{ test_ip_gateway4 | regex_escape() }}\s*$'
+        regexp: |-
+          ^# Ansible managed:[^\n]*
+          \s*auto {{ test_iface_name }}\s*
+          \s*iface veth0 inet static\s*
+          \s*address {{ test_ip_address | regex_escape() }}\s*
+          \s*gateway {{ test_ip_gateway4 | regex_escape() }}\s*
       when: >-
         network_interface_configuration_backend == 'ifupdown'
         and not network_interface_single_configuration_file | bool
 
-    - name: Compare templated file
-      include_tasks: helpers/compare_lines.yaml
+    # - name: Compare templated file
+    #   include_tasks: helpers/compare_lines.yaml
+    #   vars:
+    #     compare_lines_from_file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
+    #     compare_lines_to: |
+    #       auto {{ test_iface_name }}  
+    #       iface {{ test_iface_name }} inet static
+    #       address {{ test_ip_address }}
+    #       gateway {{ test_ip_gateway4 }}
+    #   when: >-
+    #     network_interface_configuration_backend == 'ifupdown'
+    #     and not network_interface_single_configuration_file | bool
+
+    - name: Compare templated file in single configuration file mode
+      include_tasks: helpers/test_file_contents.yaml
       vars:
-        compare_lines_from_file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
-        compare_lines_to: |
-          auto {{ test_iface_name }}  
-          iface {{ test_iface_name }} inet static
-          address {{ test_ip_address }}
-          gateway {{ test_ip_gateway4 }}
+        file: "/etc/network/interfaces"
+        regexp: |-
+          ^# Ansible managed:[^\n]*
+          {% if network_interface_implicit_loopback %}
+          \s*auto lo\s*
+          \s*iface lo inet loopback\s*
+          {% endif %}
+          \s*auto veth0\s*
+          \s*iface veth0 inet static\s*
+          \s*address 192.0.2.2/24\s*
+          \s*gateway 192.0.2.1\s*
       when: >-
         network_interface_configuration_backend == 'ifupdown'
-        and not network_interface_single_configuration_file | bool
+        and network_interface_single_configuration_file | bool
 
     - name: Start interface
       include_tasks: tasks/system_interface_control.yaml

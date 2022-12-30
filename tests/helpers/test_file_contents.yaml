@@ -5,5 +5,6 @@
 
 - assert:
     that: >-
-      (slurped.content | b64decode) is match( '{{ regexp }}' )
+      (slurped.content | b64decode) is match( regexp )
     success_msg: "{{ slurped.content | b64decode }} matches {{ regexp }}"
+    fail_msg: "{{ slurped.content | b64decode }} does not match {{ regexp }}"

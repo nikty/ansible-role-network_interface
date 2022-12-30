@@ -1,4 +1,8 @@
 ---
+- name: Install common network packages
+  package:
+    name: "{{ network_interface_network_packages }}"
+  
 - name: Run tasks for the selected backend
   include_tasks: "{{ network_interface_configuration_backend }}.yaml"
 

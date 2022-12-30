@@ -15,4 +15,10 @@ network_interface_ifupdown_packages: "{{ _network_interface_ifupdown_packages[ a
 
 network_interface_ifupdown_net_path: "/etc/network/interfaces.d"
 
+_network_interface_network_packages:
+  Debian:
+    - bridge-utils
+    - ifenslave
+    - iproute2
 
+network_interface_network_packages: "{{ _network_interface_network_packages[ ansible_os_family ] }}"

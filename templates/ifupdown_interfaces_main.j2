@@ -1,8 +1,8 @@
-#jinja2: lstrip_blocks: True, trim_blocks: True
+{##jinja2: lstrip_blocks: True, trim_blocks: True#}
 # {{ ansible_managed }}
 
 {% if network_interface_single_configuration_file | default(False) %}
-{%   if network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device') %}
+{%   if network_interface_implicit_loopback and network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device') %}
 {%     set _ = network_loopback_interfaces.append( { 'device' : network_interface_loopback_name } ) %}
 {%   endif %}
 {%   for item in network_loopback_interfaces %}

@@ -6,7 +6,6 @@ network_bridge_interfaces: []
 network_bond_interfaces: []
 network_vlan_interfaces: []
 network_check_packages: true
-network_allow_service_restart: true
 network_modprobe_persist: true
 
 # Remove all other settings in interfaces(5) file
