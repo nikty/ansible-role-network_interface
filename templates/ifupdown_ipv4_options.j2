@@ -8,9 +8,7 @@
     broadcast {{ ipv4_list[0] | ipaddr('broadcast') }}
   {% endif %}
 {% else %}
-{%  if type != 'vlan' %} 
     address {{ ipv4_list[0] }}
-{%  endif %}
 {% endif -%}
 
 {% if item.gateway4 is defined and item.gateway4 != 'auto' %}
@@ -19,7 +17,7 @@
     gateway {{ ipv4_list[0] | ipaddr('1') | ipaddr('address') }}
 {% endif -%}
 
-{% for address in (type == 'vlan') | ternary(ipv4_list, ipv4_list[1:]) %}
+{% for address in ipv4_list[1:] %}
     up ip address add dev $IFACE {{ address }}
     down ip address del dev $IFACE {{ address }}
 {% endfor %}

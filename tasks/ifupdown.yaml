@@ -14,8 +14,6 @@
     - network_check_packages
     - ansible_os_family == "Debian"
 
-
-
 # Template main configuration file
 # This file contains only minimal configuration for included files
 # or all settings if `network_interface_single_configuration_file` is enabled
@@ -58,10 +56,10 @@
   include_tasks: "ifupdown_loopback_interfaces.yaml"
 
 - name: Configure Ethernet interfaces
-  include_tasks: "ifupdown_ethernet_interfaces.yml"
+  include_tasks: "ifupdown_ethernet_interfaces.yaml"
 
 - name: Configure Bond interfaces
-  include_tasks: "bond_interfaces.yml"
+  include_tasks: "ifupdown_bond_interfaces.yaml"
 
 - name: Configure VLAN interfaces
   include_tasks: "ifupdown_vlan_interfaces.yaml"

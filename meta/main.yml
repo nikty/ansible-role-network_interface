@@ -5,7 +5,7 @@ galaxy_info:
   namespace: nikty
   author: "Benno Joy, Martin Verges, Luke Short, Eric Anderson, nikty"
   license: BSD-2-Clause
-  min_ansible_version: 1.9
+  min_ansible_version: 2.9.16
   platforms:
     - name: Debian
       versions:
@@ -32,12 +32,15 @@ galaxy_info:
     #     - disco
     #     - eoan
     #     - focal
-    - name: CentOS
-      versions:
-        - 8
+    # - name: CentOS
+    #   versions:
+    #     - 8
     # - name: EL
     #   versions:
     #     - 7
+    # - name: FreeBSD
+    #   versions:
+    #     - 13
   galaxy_tags:
     - networking
     - system

@@ -1,9 +1,0 @@
-{% extends "ifupdown_interface_base.j2" %}
-{% block main %}
-{{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
-
-{{ def_iface('ethernet', 'inet', item) }}
-
-{{ def_iface('ethernet', 'inet6', item) }}
-
-{%- endblock %} 

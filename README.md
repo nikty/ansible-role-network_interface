@@ -18,7 +18,7 @@ machines. The role can be used to configure:
 ## Requirements
 
 
-This role requires Ansible 2.9 or higher, and platform requirements are listed
+This role requires Ansible 2.9.16 or higher, and platform requirements are listed
 in the metadata file.
 
 ## Role Variables
@@ -111,6 +111,7 @@ This role supports several ways to restart interfaces:
 
 ### Ethernets
 ```
+#network_interface_ethernets:
 network_ether_interfaces:
   # Static IPv4 and IPv6
   - device: eth0
@@ -156,14 +157,19 @@ network_ether_interfaces:
 ```
 
 ### VLANs
+
+Vlans can have arbitrary name:
 ```
 network_vlan_interfaces:
-  - device: vlan10 # TODO: can't have arbitrary name
-    link: eth1 # TODO: currently not used
-    id: 10 # TODO: currently not used
-  # - device: eth1.10
-  #   link: eth1
-  #   id: 10
+  - device: vlan10
+    link: eth1
+    id: 10
+```
+
+On Debians it's enough to set the vlan device name, and interface will be created based on the name (see **VLAN INTERFACES** in `man interfaces`):
+```
+network_vlan_interfaces:
+  - device: eth1.10
 ```
 
 ### Bonds
@@ -180,45 +186,9 @@ network_bond_interfaces
 
 ## Examples
 
-Debian (not RedHat) network configurations can optionally use CIDR
-notation for IPv4 addresses instead of specifying the address and
-subnet mask separately. It is required to use CIDR notation for IPv6
-addresses on Debian.
 
-IPv4 example with CIDR notation:
-```
-      cidr: 192.168.10.18/24
-      # OPTIONAL: specify a gateway for that network, or auto for network+1
-      gateway: auto
-```
-IPv4 example with classic IPv4:
-```
-      address: 192.168.10.18
-      netmask: 255.255.255.0
-      network: 192.168.10.0
-      broadcast: 192.168.10.255
-      gateway: 192.168.10.1
-```
-If you want to use a different MAC Address for your Interface, you can simply add it.
-```
-      hwaddress: aa:bb:cc:dd:ee:ff
-```
-On some rare occasion it might be good to set whatever option you like. Therefore it
-is possible to use
-```
-      options:
-          - "up /execute/my/command"
-          - "down /execute/my/other/command"
-```
-and the IPv6 version
-```
-      ipv6_options:
-          - "up /execute/my/command"
-          - "down /execute/my/other/command"
-```
+1) Configure eth1 and eth2 on a host with a static IP and a dhcp IP.
 
-1) Configure eth1 and eth2 on a host with a static IP and a dhcp IP. Also
-define static routes and a gateway.
 ```
 
 - hosts: myhost
@@ -226,22 +196,14 @@ define static routes and a gateway.
     - role: network
       network_ether_interfaces:
        - device: eth1
-         bootproto: static
-         cidr: 192.168.10.18/24
+         addresses:
+	   - 192.168.10.18/24
          gateway: auto
-         route:
-          - network: 192.168.200.0
-            netmask: 255.255.255.0
-            gateway: 192.168.10.1
-          - network: 192.168.100.0
-            netmask: 255.255.255.0
-            gateway: 192.168.10.1
        - device: eth2
-         bootproto: dhcp
+         dhcp4: yes
 ```
-Note: it is not required to add routes, default route will be added automatically.
 
-2) Configure a bridge interface with multiple NICs added to the bridge.
+2) TODO Configure a bridge interface with multiple NICs added to the bridge.
 ```
 
 - hosts: myhost
@@ -278,15 +240,12 @@ added for ethernet interfaces.
     - role: network
       network_bond_interfaces:
         - device: bond0
-          address: 192.168.10.128
-          netmask: 255.255.255.0
-          bond_mode: active-backup
-          bond_slaves: [eth1, eth2]
-
-          # Optional values
-          bond_miimon: 100
-          bond_lacp_rate: slow
-          bond_xmit_hash_policy: layer3+4
+          addresses:
+	    - 192.168.10.128/24
+	  parameters:
+            mode: active-backup
+	    mii-monitor-interval: 100
+          interfaces: [eth1, eth2]
 ```
 
 4) Configure a bonded interface with "802.3ad" as the bonding mode and IP
@@ -298,11 +257,11 @@ address obtained via DHCP.
     - role: network
       network_bond_interfaces:
         - device: bond0
-          bootproto: dhcp
-          bond_mode: 802.3ad
-          bond_miimon: 100
-          bond_slaves: [eth1, eth2]
-          bond_ad_select: 2
+	  dhcp4: yes
+	  parameters:
+            mode: 802.3ad
+            mii-monitor-interval: 100
+          interfaces: [eth1, eth2]
 ```
 
 5) Configure a VLAN interface with the vlan tag 2 for an ethernet interface
@@ -311,15 +270,12 @@ address obtained via DHCP.
 - hosts: myhost
   roles:
     - role: network
-      network_ether_interfaces:
-       - device: eth1
-         bootproto: static
-         cidr: 192.168.10.18/24
-         gateway: auto
       network_vlan_interfaces:
        - device: eth1.2
-         bootproto: static
-         cidr: 192.168.20.18/24
+         link: eth1
+	 id: 2
+         addresses:
+	   - 192.168.20.18/24
 ```
 
 6) All the above examples show how to configure a single host, The below
@@ -339,42 +295,33 @@ Describe your network configuration for each host in host vars:
 ```
     network_ether_interfaces:
            - device: eth1
-             bootproto: static
-             address: 192.168.10.18
-             netmask: 255.255.255.0
-             gateway: 192.168.10.1
-             route:
-              - network: 192.168.200.0
-                netmask: 255.255.255.0
-                gateway: 192.168.10.1
+	     addresses:
+	       - 192.168.10.18/24
+             gateway4: 192.168.10.1
     network_bond_interfaces:
             - device: bond0
-              bootproto: dhcp
-              bond_mode: 802.3ad
-              bond_miimon: 100
-              bond_slaves: [eth2, eth3]
+              dhcp4: yes
+	      parameters:
+                mode: 802.3ad
+              mii-monitor-interval: 100
+              interfaces: [eth2, eth3]
 ```
 ### host_vars/host2
 ```
 network_ether_interfaces:
        - device: eth0
-         bootproto: static
-         address: 192.168.10.18
-         netmask: 255.255.255.0
-         gateway: 192.168.10.1
+         addresses: [ 192.168.10.18/24 ]
+         gateway4: 192.168.10.1
 ```
 
-7) If resolvconf package should be used, it is possible to add some DNS configurations
+7) You can also add IPv6 static IP configuration:
 ```
-dns-nameserver: [ "8.8.8.8", "8.8.4.4" ]
-dns-search: "search.mydomain.tdl"
-dns-domain: "mydomain.tdl"
-```
-
-8) You can add IPv6 static IP configuration on Ethernet, Bond or Bridge interfaces
-```
-ipv6_address: "aaaa:bbbb:cccc:dddd:dead:beef::1/64"
-ipv6_gateway: "aaaa:bbbb:cccc:dddd::1"
+network_ether_interfaces:
+  - device: eth1
+    addresses:
+    - 192.0.2.1/24
+    - "aaaa:bbbb:cccc:dddd:dead:beef::1/64"
+    gateway6: "aaaa:bbbb:cccc:dddd::1"
 ```
 
 Create a playbook which applies this role to all hosts as shown below, and run
@@ -388,43 +335,11 @@ and routed updated.
     - role: network
 ```
 
-9) This role can also optionally add network interfaces to firewalld zones. The
-core firewalld module (http://docs.ansible.com/ansible/latest/firewalld_module.html)
-can perform the same function, so if you make use of both modules then your
-playbooks may not be idempotent.  Consider this case, where only the firewalld
-module is used:
-
-  * network_interface role runs; with no `firewalld_zone` host var set then any
-    ZONE line will be removed from ifcfg-*
-  * `firewalld` module runs; adds a `ZONE` line to ifcfg-*
-  * On the next playbook run, the network_interface role runs and removes the
-    ZONE line again, and so the cycle repeats.
-
-In order for this role to manage firewalld zones, the system must be running a
-RHEL based distribution, and using NetworkManager to manage the network
-interfaces.  If those criteria are met, the following example shows how to add
-the eth0 interface to the public firewalld zone:
-```
-       - device: eth0
-         bootproto: static
-         address: 192.168.10.18
-         netmask: 255.255.255.0
-         gateway: 192.168.10.1
-         firewalld_zone: public
-```
-Note: Ansible needs network connectivity throughout the playbook process, you
-may need to have a control interface that you do *not* modify using this
-method while changing IP Addresses so that Ansible has a stable connection
-to configure the target systems. All network changes are done within a single
-generated script and network connectivity is only lost for few seconds.
-
-
 ## Dependencies
 
 `python-netaddr`
 
 ## License
-
 
 BSD
 

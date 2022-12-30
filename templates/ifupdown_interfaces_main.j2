@@ -6,10 +6,13 @@
 {%     set _ = network_loopback_interfaces.append( { 'device' : network_interface_loopback_name } ) %}
 {%   endif %}
 {%   for item in network_loopback_interfaces %}
-{%     include "interface_loopback_Debian.j2" %}
+{%     include "ifupdown_interface_loopback.j2" %}
 {%   endfor %}
 {%   for item in network_ether_interfaces %}
-{%     include "interface_ethernet_Debian.j2" %}
+{%     include "ifupdown_interface_ethernet.j2" %}
+{%   endfor %}
+{%   for item in network_vlan_interfaces %}
+{%     include "ifupdown_interface_vlan.j2" %}
 {%   endfor %}
 {% else %}  
 source {{ network_interface_ifupdown_net_path }}/*

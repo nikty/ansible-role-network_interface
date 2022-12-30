@@ -1,15 +1,4 @@
 ---
-
-- debug:
-    var: "{{ item }}"
-  loop:
-    - network_interface_configuration_backend
-    - network_interface_single_configuration_file
-    - network_loopback_interfaces
-    
-- pause:
-  when: lookup('env', 'TEST_PAUSE') | bool
-    
 - name: Run tasks for the selected backend
   include_tasks: "{{ network_interface_configuration_backend }}.yaml"
 

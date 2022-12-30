@@ -1,5 +1,4 @@
 ---
-
 - name: Create configuration files for vlan devices
   template:
     src: "ifupdown_interface_vlan.j2"

@@ -36,7 +36,7 @@
   {%- endif -%}
 
   {%- if family == 'inet' -%}
-    {%- if item.addresses is defined and item.addresses | ipv4 and type != 'vlan' -%}
+    {%- if item.addresses is defined and item.addresses | ipv4 -%}
       {%- set method = 'static' -%}
     {%- elif item.dhcp4 is defined and item.dhcp4 -%}
       {%- set method = 'dhcp' -%}
@@ -57,9 +57,12 @@
   {%- if method is defined %}
 iface {{ item.device }} {{ family }} {{ method }}
 
-{%    if type == 'vlan' %}
-    up /bin/ip link add link {{ item.link }} name {{ item.device }} type vlan id {{ item.id }}
+{%    if type == 'vlan' and item.link is defined and item.id is defined and (item.device != "{}.{}".format(item.link, item.id)) %}
+    pre-up /bin/ip link add link {{ item.link }} name {{ item.device }} type vlan id {{ item.id }}
     down /bin/ip link del name {{ item.device }}
+{#{%      if item.link is not in network_ether_interfaces %}
+    up /bin/ip link set {{ item.link }} up
+{%      endif %}#}
 {%    endif %}
 
     {%- if family == 'inet' -%}
