@@ -3,8 +3,12 @@
 
 - name: Verify
   hosts: all
-  gather_facts: false
+  gather_facts: yes
   tasks:
-  - name: Example assertion
-    assert:
-      that: true
+
+    # - include_role:
+    #     name: test_network_interfaces
+
+- import_playbook: ../../tests/test_ethernet_ipv4_static.yaml
+  
+    
