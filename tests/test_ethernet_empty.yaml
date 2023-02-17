@@ -1,0 +1,53 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    test_iface_name: veth0
+  tasks:
+
+    - set_fact:
+        network_interface: "{{ network_interface | combine(_network_interface) }}"
+      vars:
+        _network_interface:
+          ethernets:
+            - device: "{{ test_iface_name }}"
+        
+    - include_tasks: helpers/set_test_variables.yaml
+
+    - import_role:
+        name: network_interface
+
+    - include_tasks: helpers/flush_handlers.yaml
+      
+    - include_tasks: helpers/test_file_contents.yaml
+      vars:
+        file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
+        regexp: |-
+          #.*
+          \s*auto veth0\s*
+          \s*iface veth0 inet manual\s*
+
+    - name: Start interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: up
+        
+    - name: Test interface is up
+      include_tasks: tasks/test_interface_state.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: up
+
+    - name: Stop interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: down
+
+    - name: Assert interface is down
+      include_tasks: tasks/test_interface_state.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: down
+...

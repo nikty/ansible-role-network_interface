@@ -1,0 +1,20 @@
+---
+- name: Create the network configuration file for bridge devices
+  template:
+    src: "bridge_{{ ansible_os_family }}.j2"
+    dest: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
+  loop: "{{ network_interface['bridges'] }}"
+  register: p
+  notify: network_interface__handler_restart_networking
+
+# - name: Create the network configuration file for port on the bridge devices
+#   template:
+#     src: "bridge_port_{{ ansible_os_family }}.j2"
+#     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.1 }}{{ network_interface_file_postfix }}"
+#   with_subelements:
+#     - '{{ network_bridge_interfaces }}'
+#     - interfaces
+#   when:
+#     - not ansible_os_family == "Debian"
+#   register: bridge_port_result
+#   notify: network_interface__handler_restart_networking

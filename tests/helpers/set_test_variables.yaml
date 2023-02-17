@@ -1,7 +1,7 @@
 - set_fact:
     #network_interface_configured_only: "{{ lookup('env', 'TEST_CONFIGURED_ONLY') | default(True, True) | bool }}"
     network_interface_implicit_loopback: "{{ lookup('env', 'TEST_IMPLICIT_LOOPBACK') | default( network_interface_implicit_loopback, True) | bool }}"
-    network_restart_interfaces: "{{ lookup('env', 'TEST_RESTART') | default( network_restart_interfaces, True) | bool }}"
+    network_interface_restart: "{{ lookup('env', 'TEST_RESTART') | default( network_interface_restart, True) | bool }}"
     #network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False, True) | bool }}"
     #network_interface_restart_method: "{{ lookup('env', 'TEST_RESTART_METHOD') | default('handlers', True) }}"
     network_interface_single_configuration_file: "{{ lookup('env', 'TEST_SINGLE_CONFIG_FILE') | default( network_interface_single_configuration_file, True ) | bool }}"

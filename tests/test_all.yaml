@@ -1,8 +1,47 @@
-- import_playbook: 001_test_ethernet_ipv4_static.yaml
-- import_playbook: 002_test_ethernet_ipv4_auto_gateway.yaml
-# - import_playbook: 003_test_ethernet_ipv4_static_multiple_addresses.yaml
-# - import_playbook: 004_test_ethernet_ipv4_static_with_options.yaml
-# - import_playbook: 005_test_ethernet_manual_debian_options.yaml
-# - import_playbook: 006_test_ethernet_ipv6_static.yaml
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_empty.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ifupdown_selection_override.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_command_options_only.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ipv4_auto_gateway.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ipv4_static.yaml
+  
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ipv4_static_multiple_addresses.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ipv4_static_with_options.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ipv6_static.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ipv6_static_multiple_addresses.yaml
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_ethernet_ipv4_and_ipv6_static.yaml  
+
+- import_playbook: ../../shared/converge.yaml
+- import_playbook: test_loopback_implicit.yaml
+
 # - import_playbook: 007_test_loopback_interface_no_options.yaml
-# - import_playbook: 008_test_loopback_interface_ipv4_static.yaml
+# # - import_playbook: 008_test_loopback_interface_ipv4_static.yaml
+
+
+# # Test single vlan with static IPv4 address
+# - import_playbook: 020_test_vlan_ipv4_static.yaml
+
+# # Test single vlan with custom interface name
+# - import_playbook: 021_test_vlan_arbitrary_name.yaml
+
+# # Test single bond interface without IP config
+# - import_plaubook: 030_ifupdown_bonding.yaml
+  
+# # - import_playbook: 100_test_implicit_loopback.yaml

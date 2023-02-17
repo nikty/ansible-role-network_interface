@@ -1,8 +1,4 @@
 ---
-- name: Install common network packages
-  package:
-    name: "{{ network_interface_network_packages }}"
-  
 - name: Run tasks for the selected backend
   include_tasks: "{{ network_interface_configuration_backend }}.yaml"
 
@@ -11,13 +7,13 @@
     - reboot:
     - setup:
   when: >-
-    network_restart_interfaces | bool
+    network_interface_restart | bool
     and network_interface_restart_reboot | bool
     and network_interface__configuration_changed
 
 - name: Restart interfaces in last task in this role
   include_tasks: "{{ ansible_os_family }}_restart.yml"
   when: >-
-    network_restart_interfaces | bool
+    network_interface_restart | bool
     and not (network_interface_restart_reboot | bool)
     and network_interface_restart_method == 'last_task'

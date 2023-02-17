@@ -4,12 +4,12 @@ Testing is done via molecule.
 
 To run all tests execute:
 ```
-mol verify -s vagrant
+molecule verify
 ```
 
 To run single test set `TEST_VERIFY_PLAYBOOK` variable:
 ```
-TEST_VERIFY_PLAYBOOK=tests/001_test_ethernet_ipv4_static.yaml  mol verify -s vagrant
+TEST_VERIFY_PLAYBOOK=tests/001_test_ethernet_ipv4_static.yaml  molecule verify
 ```
 
 ## Environment variables
@@ -20,7 +20,7 @@ Several environment variables can be used to control tests.
 
 - `TEST_IMPLICIT_LOOPBACK`: whether to configure loopback device if it's not explicitly mentioned in configuration (sets `network_interface_implicit_loopback`)
 
-- `TEST_RESTART`: whether to restart interfaces (sets `network_restart_interfaces`)
+- `TEST_RESTART`: whether to restart interfaces (sets `network_interface_restart`)
 
 - `TEST_SINGLE_CONFIG_FILE`: set `network_interface_single_configuration_file`
 
@@ -80,3 +80,4 @@ Vars:
     - compare_lines_to_file: path to remote file
     - compare_lines_ignore_blank_lines: boolean - whether blank lines matter. Default: **true**
     - compare_lines_trim_whitespace: boolean - ignore whitespace at the beginning and ending of lines. Default: **true**
+

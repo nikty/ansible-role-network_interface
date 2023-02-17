@@ -15,22 +15,18 @@
         
         - name: Restore original network configuration
           shell: |
-            set -e
+            rm -rf /etc/network/interfaces*
             
-            rm -rf /etc/network || true
-            
-            cp -av {{ test_backup_dir }}/network.backup /etc/network
+            cp -av {{ test_backup_dir }}/network.backup/interfaces* /etc/network
 
             ip route restore < {{ test_backup_dir }}/ip_route_save.bin
           when: p.stat.exists and p.stat.isdir
         
-        - name: Save original network configuration | Debian
+        - name: Save original network configuration
           shell: |
-            set -e
+            mkdir {{ test_backup_dir }}/network.backup
             
-            mkdir {{ test_backup_dir }}
-            
-            cp -av /etc/network {{ test_backup_dir }}/network.backup
+            cp -av /etc/network/interfaces* {{ test_backup_dir }}/network.backup/
             
             ip route save > {{ test_backup_dir }}/ip_route_save.bin
           when: not p.stat.exists

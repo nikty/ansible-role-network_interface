@@ -1,25 +1,23 @@
 ---
-
-- import_playbook: ../../shared/converge.yaml
-  
 - name: Test configuring ethernet interface with static IPv4
   hosts: all
   vars:
-    test_iface_name: "{{ (ansible_system == 'Linux') | ternary('veth0', 'TODO') }}"
+    test_iface_name: veth0
     test_ip_address: 192.0.2.2/24
     test_ip_gateway4: 192.0.2.1
-
-    network_ether_interfaces:
-      - device: "{{ test_iface_name }}"
-        addresses:
-          - "{{ test_ip_address }}"
-        gateway4: "{{ test_ip_gateway4 }}"
 
   become: yes
   tasks:
 
-    - name: "Running test [001]"
-      debug: msg="[001]"
+    - set_fact:
+        network_interface: "{{ network_interface | combine(_network_interface) }}"
+      vars:
+        _network_interface:
+          ethernets:
+            - device: "{{ test_iface_name }}"
+              addresses:
+                - "{{ test_ip_address }}"
+              gateway4: "{{ test_ip_gateway4 }}"
 
     - include_tasks: helpers/set_test_variables.yaml
       
@@ -42,7 +40,7 @@
       vars:
         file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
         regexp: |-
-          ^# Ansible managed:[^\n]*
+          ^#[^\n]*
           \s*auto {{ test_iface_name }}\s*
           \s*iface veth0 inet static\s*
           \s*address {{ test_ip_address | regex_escape() }}\s*
@@ -51,25 +49,12 @@
         network_interface_configuration_backend == 'ifupdown'
         and not network_interface_single_configuration_file | bool
 
-    # - name: Compare templated file
-    #   include_tasks: helpers/compare_lines.yaml
-    #   vars:
-    #     compare_lines_from_file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
-    #     compare_lines_to: |
-    #       auto {{ test_iface_name }}  
-    #       iface {{ test_iface_name }} inet static
-    #       address {{ test_ip_address }}
-    #       gateway {{ test_ip_gateway4 }}
-    #   when: >-
-    #     network_interface_configuration_backend == 'ifupdown'
-    #     and not network_interface_single_configuration_file | bool
-
     - name: Compare templated file in single configuration file mode
       include_tasks: helpers/test_file_contents.yaml
       vars:
         file: "/etc/network/interfaces"
         regexp: |-
-          ^# Ansible managed:[^\n]*
+          ^#[^\n]*
           {% if network_interface_implicit_loopback %}
           \s*auto lo\s*
           \s*iface lo inet loopback\s*
@@ -87,7 +72,6 @@
       vars:
         interface: "{{ test_iface_name }}"
         state: up
-      when: not network_restart_interfaces
         
     - name: Test interface is up
       include_tasks: tasks/test_interface_state.yaml

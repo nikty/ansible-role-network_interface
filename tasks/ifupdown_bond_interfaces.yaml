@@ -1,26 +1,23 @@
 ---
-- name: Create the network configuration file for slave in the bond devices
-  template:
-    src: "bond_slave_{{ ansible_os_family }}.j2"
-    dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.1 }}{{ network_interface_file_postfix }}"
-  with_subelements:
-    - "{{ network_bond_interfaces }}"
-    - interfaces
-  register: bond_port_result
-  notify: network_interface__handler_restart_networking
-  when: >-
-    not ansible_os_family == "Debian"
-
 - name: Create the network configuration file for bond devices
   template:
     src: "ifupdown_interface_bond.j2"
     dest: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
-  loop: "{{ network_bond_interfaces }}"
-  when:
-    - item.present | default(True)
-    - not network_interface_single_configuration_file
-  register: bond_result
+  loop: "{{ network_interface['bonds'] }}"
+  register: p
   notify: network_interface__handler_restart_networking
+
+# - name: Create the network configuration file for slave in the bond devices
+#   template:
+#     src: "bond_slave_{{ ansible_os_family }}.j2"
+#     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.1 }}{{ network_interface_file_postfix }}"
+#   with_subelements:
+#     - "{{ network_bond_interfaces }}"
+#     - interfaces
+#   register: bond_port_result
+#   notify: network_interface__handler_restart_networking
+#   when: >-
+#     not ansible_os_family == "Debian"
 
 # - name: Make sure the bonding module is loaded
 #   modprobe:
@@ -41,10 +38,11 @@
 
 - name: Save changed bonding interfaces
   set_fact:
-    bond_interfaces_changed: >
-      {{ bond_result.results | default([])
+    _network_interface_changed_bonds: >
+      {{ p.results | default([])
            | selectattr('changed')
            | map(attribute='item.device')
            | list }}
 
-- debug: var=bond_interfaces_changed
+- debug:
+    var: _network_interface_changed_bonds

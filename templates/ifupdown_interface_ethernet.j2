@@ -1,9 +1,11 @@
 {% extends "ifupdown_interface_base.j2" %}
-{% block main %}
-{{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
-
-{{ def_iface('ethernet', 'inet', item) }}
-
-{{ def_iface('ethernet', 'inet6', item) }}
-
-{%- endblock %} 
+{% set type = 'ethernet' %}
+{# {% block ifaces %} #}
+{# {{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }} #}
+{# {% if add_family_inet | default(False) %} #}
+{# {{ def_iface('ethernet', 'inet', item) }} #}
+{# {% endif %} #}
+{# {% if add_family_inet6 | default(False) %} #}
+{# {{ def_iface('ethernet', 'inet6', item) }} #}
+{# {% endif %} #}
+{# {% endblock %} #}

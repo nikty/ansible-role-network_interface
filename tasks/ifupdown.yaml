@@ -1,5 +1,18 @@
 ---
-# Install packages
+
+- name: Add implicit loopback interface
+  block:
+    - set_fact:
+        network_interface: "{{ network_interface | combine(_network_interface, list_merge='append') }}"
+        _network_interface_implicit_loopback_added: yes
+      vars:
+        _network_interface:
+          loopbacks:
+            - device: "{{ network_interface_loopback_name }}"
+  when: >-
+    network_interface_implicit_loopback | bool
+    and network_interface_loopback_name not in network_interface['loopbacks'] | map(attribute='device')
+
 
 - name: Update apt cache
   apt:
@@ -11,18 +24,20 @@
     state: present
   environment: "{{ env }}"
   when:
-    - network_check_packages
     - ansible_os_family == "Debian"
 
+# Install additional packages if configuration requires it
+- name: Install additional packages
+  include_tasks: install_additional_packages.yaml
+  
 # Template main configuration file
 # This file contains only minimal configuration for included files
 # or all settings if `network_interface_single_configuration_file` is enabled
-
 - name: Template interfaces file
   template:
     src: ifupdown_interfaces_main.j2
     dest: /etc/network/interfaces
-  when: network_interface_configured_only | bool
+  #when: network_interface_configured_only | bool
   notify: network_interface__handler_restart_networking
   register: p
 
@@ -32,52 +47,53 @@
 
 - name: Select all managed interfaces as changed when using single file configuration mode
   set_fact:
-    network_interface__all_changed_interfaces: >-
-      {{ ( network_loopback_interfaces
-         + network_ether_interfaces
-         + network_vlan_interfaces
-         + network_bond_interfaces ) | map(attribute='device') | list | unique }}
+    _network_interface_changed_interfaces: >-
+      {{ ( network_interface['loopbacks'] | default([])
+         + network_interface['ethernets'] | default([])
+         + network_interface['vlans'] | default([])
+         + network_interface['bonds'] | default([]) ) | map(attribute='device') | list | unique }}
   when:
     - p is changed
     - network_interface_single_configuration_file
 
+#- include_tasks: "ifupdown_remove_configuration.yaml"
+  
 # Template separate configuration files for interfaces
-
-- name: Create the directory for interface configuration files
-  file:
-    path: "{{ network_interface_ifupdown_net_path }}"
-    state: directory
-  when:
-    - not network_interface_single_configuration_file
-
-- include_tasks: "ifupdown_remove_configuration.yaml"
-
-- name: Configure Loopback interfaces
-  include_tasks: "ifupdown_loopback_interfaces.yaml"
-
-- name: Configure Ethernet interfaces
-  include_tasks: "ifupdown_ethernet_interfaces.yaml"
-
-- name: Configure Bond interfaces
-  include_tasks: "ifupdown_bond_interfaces.yaml"
-
-- name: Configure VLAN interfaces
-  include_tasks: "ifupdown_vlan_interfaces.yaml"
-
-- name: Configure Bridge interfaces
-  include_tasks: "bridge_interfaces.yml"
-  when: network_bridge_interfaces | length > 0
+- block:
+  - name: Create the directory for interface configuration files
+    file:
+      path: "{{ network_interface_ifupdown_net_path }}"
+      state: directory
+  
+  - name: Configure Loopback interfaces
+    include_tasks: "ifupdown_loopback_interfaces.yaml"
+  
+  - name: Configure Ethernet interfaces
+    include_tasks: "ifupdown_ethernet_interfaces.yaml"
+  
+  - name: Configure Bond interfaces
+    include_tasks: "ifupdown_bond_interfaces.yaml"
+  
+  - name: Configure VLAN interfaces
+    include_tasks: "ifupdown_vlan_interfaces.yaml"
+  
+  - name: Configure Bridge interfaces
+    include_tasks: "ifupdown_bridge_interfaces.yaml"
+  when: >-
+    not network_interface_single_configuration_file
+    
+- name: Register changed interfaces names
+  set_fact:
+    _network_interface_changed_interfaces: >-
+      {{ _network_interface_changed_interfaces | default([])
+         + _network_interface_changed_loopbacks | default([])
+         + _network_interface_changed_ethernets | default([])
+         + _network_interface_changed_vlans | default([])
+         + _network_interface_changed_bonds | default([])
+         | sort | unique }}
 
 - set_fact:
-    network_interface__all_changed_interfaces: >-
-      {{ network_interface__all_changed_interfaces | default([])
-         + network_interface__loopback_changed
-         + ether_interfaces_changed
-         + vlan_interfaces_changed
-         + bond_interfaces_changed | sort | unique }}
-
-- set_fact:
-    network_interface__configuration_changed: "{{ network_interface__all_changed_interfaces | length > 0 }}"
+    network_interface__configuration_changed: "{{ _network_interface_changed_interfaces | length > 0 }}"
   
 
 

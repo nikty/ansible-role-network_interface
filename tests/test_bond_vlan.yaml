@@ -1,0 +1,60 @@
+---
+- import_playbook: ../../shared/converge.yaml
+
+- hosts: all
+  vars:
+    test_bonding_1:
+      device: bond0
+      mtu: 1280
+      interfaces: [ veth0, veth1 ]
+      parameters:
+        mode: 802.3ad
+        mii-monitor-interval: 100
+        transmit-hash-policy: layer2+3
+        lacp-rate: fast
+
+    # network_bond_interfaces:
+    #   - "{{ test_bonding_1 }}"
+      
+  become: yes
+  tasks:
+
+    - name: "Running test [030]"
+      debug: msg="[030]"
+
+    - set_fact:
+        network_interface: "{{ network_interface | combine(_network_interface) }}"
+      vars:
+        _network_interface:
+          bonds:
+            - "{{ test_bonding_1 }}"
+          vlans:
+            - device: bond0.10
+              link: bond0
+              id: 10
+              
+
+    - include_tasks: helpers/set_test_variables.yaml
+
+    - import_role:
+        name: network_interface
+
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
+
+    - include_tasks: helpers/flush_handlers.yaml
+
+    - include_tasks: helpers/debug_pause.yaml
+
+    - name: Start interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_bonding_1.device }}"
+        state: up
+
+    - name: Stop interface
+      include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_bonding_1.device }}"
+        state: down
+...

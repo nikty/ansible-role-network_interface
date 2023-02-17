@@ -1,25 +1,24 @@
 ---
-
-- import_playbook: ../../shared/converge.yaml
-  
 - name: Test configuring ethernet interface with static IPv4 and auto gateway
   hosts: all
   vars:
     test_iface_name: veth0
     test_ip_address: 192.0.2.2/24
     auto_gateway: 192.0.2.1
-    network_ether_interfaces:
-      - device: "{{ test_iface_name }}"
-        addresses:
-          - "{{ test_ip_address }}"
-        gateway4: "auto"
 
   become: yes
   
   tasks:
 
-    - name: "Running test [002]"
-      debug: msg="[002]"
+    - set_fact:
+        network_interface: "{{ network_interface | combine(_network_interface) }}"
+      vars:
+        _network_interface:
+          ethernets:
+            - device: "{{ test_iface_name }}"
+              addresses:
+                - "{{ test_ip_address }}"
+              gateway4: "auto"
 
     - include_tasks: helpers/set_test_variables.yaml
 
@@ -37,27 +36,13 @@
         state: absent
     
     - include_tasks: helpers/flush_handlers.yaml
-      when: network_restart_interfaces
-
-    # - name: Compare templated file
-    #   include_tasks: helpers/compare_lines.yaml
-    #   vars:
-    #     compare_lines_from_file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
-    #     compare_lines_to: |
-    #       auto veth0  
-    #       iface veth0 inet static
-    #       address {{ test_ip_address }}
-    #       gateway {{ auto_gateway }}
-    #   when: >-
-    #     network_interface_configuration_backend == 'ifupdown'
-    #     and not network_interface_single_configuration_file | bool
 
     - name: Compare templated file
       include_tasks: helpers/test_file_contents.yaml
       vars:
         file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
         regexp: |-
-          ^# Ansible managed: [^\n]*
+          ^#[^\n]*
           \s*auto veth0\s*
           \s*iface veth0 inet static\s*
           \s*address 192.0.2.2/24\s*
@@ -89,7 +74,6 @@
       vars:
         interface: "{{ test_iface_name }}"
         state: up
-      when: not network_restart_interfaces
         
     - name: Test interface is up
       include_tasks: tasks/test_interface_state.yaml

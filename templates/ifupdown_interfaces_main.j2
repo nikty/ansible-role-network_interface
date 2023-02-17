@@ -2,21 +2,24 @@
 # {{ ansible_managed }}
 
 {% if network_interface_single_configuration_file | default(False) %}
-{%   if network_interface_implicit_loopback and network_interface_loopback_name not in network_loopback_interfaces | map(attribute='device') %}
-{%     set _ = network_loopback_interfaces.append( { 'device' : network_interface_loopback_name } ) %}
-{%   endif %}
-{%   for item in network_loopback_interfaces %}
+{# {%   if network_interface_implicit_loopback and network_interface_loopback_name not in network_interface['loopbacks'] | map(attribute='device') %} #}
+{# {%     set _ = network_interface['loopbacks'].append( { 'device' : network_interface_loopback_name } ) %} #}
+{# {%   endif %} #}
+{%   for item in network_interface['loopbacks'] %}
 {%     include "ifupdown_interface_loopback.j2" %}
 {%   endfor %}
-{%   for item in network_ether_interfaces %}
+
+{%   for item in network_interface['ethernets'] %}
 {%     include "ifupdown_interface_ethernet.j2" %}
 {%   endfor %}
-{%   for item in network_vlan_interfaces %}
+
+{%   for item in network_interface['vlans'] %}
 {%     include "ifupdown_interface_vlan.j2" %}
 {%   endfor %}
-{%   for item in network_bond_interfaces %}
+
+{%   for item in network_interface['bonds'] %}
 {%     include "ifupdown_interface_bond.j2" %}
 {%   endfor %}
-{% else %}  
+{% else %}
 source {{ network_interface_ifupdown_net_path }}/*
 {% endif %}

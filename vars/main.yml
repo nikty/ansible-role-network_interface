@@ -5,20 +5,29 @@
 env:
   RUNLEVEL: 1
 
-_config_files: []
 
+# ifupdown package name
 _network_interface_ifupdown_packages:
   default:
     - ifupdown
-
 network_interface_ifupdown_packages: "{{ _network_interface_ifupdown_packages[ ansible_os_family ] | default( _network_interface_ifupdown_packages['default'] ) }}"
 
+# Configuration dir for ifupdown
 network_interface_ifupdown_net_path: "/etc/network/interfaces.d"
 
-_network_interface_network_packages:
-  Debian:
-    - bridge-utils
-    - ifenslave
-    - iproute2
+# Additional packages
+_network_interface_additional_packages:
+  bridge:
+    Debian:
+      - bridge-utils
+  bond:
+    Debian:
+      - ifenslave
 
-network_interface_network_packages: "{{ _network_interface_network_packages[ ansible_os_family ] }}"
+# _network_interface_network_packages:
+#   Debian:
+#     - bridge-utils
+#     - ifenslave
+#     - iproute2
+
+# network_interface_network_packages: "{{ _network_interface_network_packages[ ansible_os_family ] }}"

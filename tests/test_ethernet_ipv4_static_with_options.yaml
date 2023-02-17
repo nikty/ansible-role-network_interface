@@ -1,6 +1,4 @@
 ---
-- import_playbook: ../../shared/converge.yaml
-
 - hosts: all
   vars:
     test_iface_name: veth0
@@ -18,20 +16,24 @@
     - name: "Running test [004]"
       debug: msg="[004]"
 
+    - set_fact:
+        network_interface: "{{ network_interface | combine(_network_interface) }}"
+      vars:
+        _network_interface:
+          ethernets:
+            - device: "{{ test_iface_name }}"
+              addresses:
+                - "{{ test_ip_address }}"
+              gateway4: "{{ test_ip_gateway4 }}"
+              debian_command_options:
+                - "{{ test_option_1 }}"
+                - "{{ test_option_2 }}"
+                - "{{ test_option_3 }}"
+        
     - include_tasks: helpers/set_test_variables.yaml
 
     - import_role:
         name: network_interface
-      vars:
-        network_ether_interfaces:
-          - device: "{{ test_iface_name }}"
-            addresses:
-              - "{{ test_ip_address }}"
-            gateway4: "{{ test_ip_gateway4 }}"
-            debian_command_options:
-              - "{{ test_option_1 }}"
-              - "{{ test_option_2 }}"
-              - "{{ test_option_3 }}"
       when: ansible_distribution == "Debian"
 
     - name: Remove default route
@@ -45,17 +47,17 @@
     - include_tasks: helpers/debug_pause.yaml
 
     
-    - name: Compare templated file
-      include_tasks: helpers/compare_lines.yaml
+    - include_tasks: helpers/test_file_contents.yaml
       vars:
-        compare_lines_from_file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
-        compare_lines_to: |
-          auto veth0  
-          iface veth0 inet static
-          address {{ test_ip_address }}
-          gateway {{ test_ip_gateway4 }}
+        file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}{{ network_interface_file_postfix }}"
+        regexp: |-
+          #[^\n]*
+          \s*auto veth0\s*
+          \s*iface veth0 inet static\s*
+          \s*address {{ test_ip_address }}\s*
+          \s*gateway {{ test_ip_gateway4 }}\s*
           {% for opt in [ test_option_1, test_option_2, test_option_3 ] %}
-          {{ opt }}
+          \s*{{ opt }}\s*
           {% endfor %}
       when: >-
         network_interface_configuration_backend == 'ifupdown'
@@ -66,7 +68,6 @@
       vars:
         interface: "{{ test_iface_name }}"
         state: up
-      when: not network_restart_interfaces
         
     - name: Test interface is up
       include_tasks: tasks/test_interface_state.yaml

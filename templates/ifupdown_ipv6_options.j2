@@ -1,22 +1,18 @@
-{% set ipv6_list = item.addresses | ipv6 %}
+{% set ipv6_list = item.addresses | ansible.utils.ipv6 %}
     address {{ ipv6_list[0] }}
-
 {% for subnet in ipv6_list[1:] %}
     up ip address add {{ subnet }} dev $IFACE
     down ip address del {{ subnet }} dev $IFACE
 {% endfor %}
-
 {% if item.gateway6 is defined and item.gateway6 != 'auto' %}
     gateway {{ item.gateway6 }}
 {% elif item.gateway6 is defined and item.gateway6 == 'auto' or network_interface_auto_gateway %}
-    gateway {{ ipv6_list[0] | ipaddr('1') | ipaddr('address') }}
+    gateway {{ ipv6_list[0] | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}
 {% endif %}
-
-
 {% if item.routes is defined %}
-  {% for route in item.routes %}
-    {% if route.to | ipv6 or route.via | ipv6 %}
+{%   for route in item.routes %}
+{%     if route.to | ansible.utils.ipv6 or route.via | ansible.utils.ipv6 %}
     up ip route add {{ route.to }} via {{ route.via }}
-    {% endif %}
-  {% endfor %}
+{%     endif %}
+{%   endfor %}
 {% endif %}

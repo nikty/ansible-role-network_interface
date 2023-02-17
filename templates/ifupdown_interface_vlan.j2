@@ -1,9 +1,2 @@
 {% extends "ifupdown_interface_base.j2" %}
-{% block main %}
-{{ item.ifupdown_iface_selection | default('auto') }} {{ item.device }}
-
-{{ def_iface('vlan', 'inet', item) }}
-
-{{ def_iface('vlan', 'inet6', item) }}
-
-{%- endblock %} 
+{% set type = 'vlan' %}

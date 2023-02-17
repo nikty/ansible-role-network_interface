@@ -3,44 +3,17 @@
   template:
     src: "ifupdown_interface_vlan.j2"
     dest: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
-  loop: "{{ network_vlan_interfaces }}"
-  register: vlan_result
+  loop: "{{ network_interface['vlans'] }}"
+  register: p
   notify: network_interface__handler_restart_networking
-  when:
-    - not network_interface_single_configuration_file
-
-
-# - name: Create the network configuration file for vlan devices
-#   template:
-#     src: "ethernet_{{ ansible_os_family }}.j2"
-#     dest: "{{ net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
-#   loop: "{{ network_vlan_interfaces }}"
-#   register: vlan_result
-#   notify: restart networking
-
-# - name: Make sure the 8021q module is loaded
-#   modprobe:
-#     name: 8021q
-#     state: present
-#   when: vlan_result is changed
-#   notify: restart networking
-
-# - name: Make the 8021q module persistent
-#   become: true
-#   lineinfile:
-#     line: '8021q'
-#     dest: /etc/modules
-#     insertafter: EOF
-#   when:
-#     - network_modprobe_persist
-#   notify: restart networking
 
 - name: Save changed vlan interfaces
   set_fact:
-    vlan_interfaces_changed: >
-      {{ vlan_result.results | default([])
+    _network_interface_changed_vlans: >
+      {{ p.results | default([])
            | selectattr('changed')
            | map(attribute='item.device')
            | list }}
 
-- debug: var=vlan_interfaces_changed
+- debug:
+    var: _network_interface_changed_vlans

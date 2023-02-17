@@ -13,7 +13,6 @@ machines. The role can be used to configure:
 - Bridge interfaces
 - Bonded interfaces
 - VLAN tagged interfaces
-- Network routes
 
 ## Requirements
 
@@ -29,14 +28,11 @@ them are as follows:
 
 | Variable | Required | Default | Comments |
 |-------------------------------------|----------|-----------|---------|
-| `network_pkgs`			   | No | `[]`        | Typically needed packages like selinux, bridge-utils, ifenslave and iproute |
+| `network_loopback_interfaces`            | No | `[]`        | The list of loopback interfaces to be added to the system. |
 | `network_ether_interfaces`	       	   | No | `[]`	      | The list of ethernet interfaces to be added to the system. |
 | `network_bridge_interfaces`	       	   | No | `[]`	      | The list of bridge interfaces to be added to the system. |
 | `network_bond_interfaces`	           | No | `[]`	      | The list of bonded interfaces to be added to the system. |
 | `network_vlan_interfaces`                | No | `[]`	      | The list of vlan interfaces to be added to the system. |
-| `network_check_packages`                 | No | `true`      | Install packages listed in network_pkgs. |
-| `network_modprobe_persist`	       	   | No | `true`      | Persisting module loading. |
-| `network_interface_configured_only` 	   | No | `true`      | Removes interfaces not configured over this role entirely when enabled. |
 | `network_interface_implicit_loopback`    | No | `true`      | Whether to create configuration for loopback interface, see *Loopback interface configuration* |
 | `network_interface_loopback_name` 	   | No | `lo`	      | Default name of the loopback interface |
 | `network_interface_file_prefix` 	   | No | `ifcfg-`    | The prefix for interface configuration files. |

@@ -1,0 +1,42 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    test_iface_name: lo
+
+  become: yes
+
+  tasks:
+
+    - set_fact:
+        network_interface: "{{ network_interface | combine(_network_interface) }}"
+      vars:
+        _network_interface:
+          loopbacks:
+            - device: "{{ test_iface_name }}"
+
+    - include_tasks: helpers/set_test_variables.yaml
+
+    - import_role:
+        name: network_interface
+
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
+
+    - include_tasks: helpers/test_file_contents.yaml
+      vars:
+        file: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ test_iface_name }}"
+        regexp: |
+          #.*
+          \s*auto {{ test_iface_name }}\s*
+          \s*iface {{test_iface_name }} inet loopback\s*
+          \s*iface {{test_iface_name }} inet manual\s*
+        
+    - include_tasks: helpers/flush_handlers.yaml
+      
+
+    - include_tasks: tasks/system_interface_control.yaml
+      vars:
+        interface: "{{ test_iface_name }}"
+        state: restart
+...

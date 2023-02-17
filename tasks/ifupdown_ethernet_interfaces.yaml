@@ -3,21 +3,19 @@
   template:
     src: "ifupdown_interface_ethernet.j2"
     dest: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
-  loop: "{{ network_ether_interfaces }}"
-  when:
-    - not network_interface_single_configuration_file
-  register: ether_result
+  loop: "{{ network_interface['ethernets'] }}"
+  register: p
   notify: network_interface__handler_restart_networking
-
 
 - name: Save changed ethernet interfaces
   set_fact:
-    ether_interfaces_changed: >
-      {{ ether_result.results | default([])
+    _network_interface_changed_ethernets: >-
+      {{ p.results | default([])
            | selectattr('changed')
            | map(attribute='item.device')
            | list }}
 
-- debug: var=ether_interfaces_changed
+- debug:
+    var: _network_interface_changed_ethernets
 
 
