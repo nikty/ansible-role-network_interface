@@ -24,7 +24,7 @@
         
         - name: Save original network configuration
           shell: |
-            mkdir {{ test_backup_dir }}/network.backup
+            mkdir -pv {{ test_backup_dir }}/network.backup
             
             cp -av /etc/network/interfaces* {{ test_backup_dir }}/network.backup/
             
