@@ -1,9 +1,0 @@
-{% set iface_name = item.device %}
-auto {{ iface_name }}
-
-{% include "_debian_ipv4.j2" %}
-{% include "_debian_bridge.j2" %}
-{% include "_debian_ipv6.j2" %}
-{% if not _debian_bridge_included | default('False') %}
-  {% include "_debian_bridge.j2" %}
-{% endif %}

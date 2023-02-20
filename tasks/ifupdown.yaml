@@ -90,6 +90,7 @@
          + _network_interface_changed_ethernets | default([])
          + _network_interface_changed_vlans | default([])
          + _network_interface_changed_bonds | default([])
+         + _network_interface_changed_bridges | default([])
          | sort | unique }}
 
 - set_fact:

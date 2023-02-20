@@ -5,3 +5,4 @@
     #network_interface_restart_reboot: "{{ lookup('env', 'TEST_RESTART_REBOOT') | default(False, True) | bool }}"
     #network_interface_restart_method: "{{ lookup('env', 'TEST_RESTART_METHOD') | default('handlers', True) }}"
     network_interface_single_configuration_file: "{{ lookup('env', 'TEST_SINGLE_CONFIG_FILE') | default( network_interface_single_configuration_file, True ) | bool }}"
+    network_interface_ifupdown_separate_stanzas: "{{ lookup('env', 'TEST_SEPARATE_STANZAS') | default(network_interface_ifupdown_separate_stanzas, True) | bool }}"

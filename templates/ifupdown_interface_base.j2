@@ -1,3 +1,4 @@
+{% from "ifupdown_macros.j2" import interface_definition with context %}
 {% if not network_interface_single_configuration_file %}
 # {{ ansible_managed }}
 
@@ -22,31 +23,48 @@
 #            address fec0:0:0:1::2/64
 #            gateway fec0:0:0:1::1
 #}
-{% set default_family = None %}
-{% if (item.addresses | default([]) | ansible.utils.ipv4)
-       or (item.dhcp4 is defined and item.dhcp4 ) %}
-{%   set add_family_inet = True %}
-{%   set default_family = 'inet' %}
-{% endif %}
-{% if (item.addresses | default([]) | ansible.utils.ipv6 ) %}
-{%   if default_family is none %}
-{%     set default_family = 'inet6' %}
-{%   endif %}
-{%   set add_family_inet6 = True %}
-{% endif %}
-{% if default_family is none %}
-{%   set add_family_inet = True %}
-{%   set default_family = 'inet' %}
-{% endif %}
-{% from "ifupdown_macros.j2" import def_iface with context %}
 {% block interface_selection %}
 {{ item.backend.ifupdown.selection | default('auto') }} {{ item.device }}
 {% endblock %}
 {% block interfaces %}
-{% if add_family_inet | default(False) %}
-{{ def_iface(type, 'inet', item) }}
-{% endif %}
-{% if add_family_inet6 | default(False) %}
-{{ def_iface(type, 'inet6', item) }}
-{% endif %}
+{% set ns = namespace(set_default = True) %}
+{%   if item.addresses is defined and item.addresses | ansible.utils.ipv4 %}
+{%     set ipv4_addresses = item.addresses | ansible.utils.ipv4 %}
+{%     if not network_interface_ifupdown_separate_stanzas
+          or type == 'bridge' %}{# "man bridge-utils-interfaces" #}
+{{ interface_definition('inet', 'static', type, item, default=ns.set_default) }}
+{%       set ns.set_default = False %}
+{%     else %}
+{%       for ip in ipv4_addresses %}
+{%         set config = item.copy() %}
+{%         set _ = config.update({ 'addresses': [ ip ]}) %}
+{{ interface_definition('inet', 'static', type, config, default=ns.set_default) }}
+{%         set ns.set_default = False %}
+{%       endfor %}
+{%     endif %}
+{%   endif %}
+{%   if item.dhcp4 is defined and item.dhcp4 %}
+{{ interface_definition('inet', 'dhcp', type, item, default=ns.set_default) }}
+{%     set ns.set_default = False %}
+{%   endif %}
+{%   if item.addresses is defined and item.addresses | ansible.utils.ipv6 %}
+{%     set ipv6_addresses = item.addresses | ansible.utils.ipv6 %}
+{%     if not network_interface_ifupdown_separate_stanzas
+          or type == 'bridge' %}{# "man bridge-utils-interfaces" #}
+{{ interface_definition('inet6', 'static', type, item, default=ns.set_default) }}
+{%       set ns.set_default = False %}
+{%     else %}
+{%       for ip in ipv6_addresses %}
+{%         set config = item.copy() %}
+{%         set _ = config.update({ 'addresses': [ ip ]}) %}
+{{ interface_definition('inet6', 'static', type, config, default=ns.set_default) }}
+{%         set ns.set_default = False %}
+{%       endfor %}
+{%     endif %}
+{%   endif %}
+{# {{ interface_definition('inet6', 'static', type, item, default=ns.set_default) }} #}
+{%   if ns.set_default == True %}
+{{ interface_definition('inet', 'manual', type, item, default=ns.set_default) }}
+{%     set ns.set_default = False %}
+{%   endif %}
 {% endblock %}

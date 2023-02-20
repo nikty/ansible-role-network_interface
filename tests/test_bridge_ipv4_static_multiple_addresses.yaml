@@ -1,50 +1,45 @@
 ---
-- import_playbook: ../../shared/converge.yaml
-
-- hosts: all
-  become: yes
+- name: Test configuring ethernet interface with static IPv4
+  hosts: all
   vars:
-    test_vlan_link: veth0
-    test_vlan_id: 10
-    test_iface_name: veth0.10
+    test_iface_name: bridge0
 
   become: yes
-
   tasks:
-
-    - name: "Running test [020]"
-      debug: msg="[020]"
 
     - set_fact:
         network_interface: "{{ network_interface | combine(_network_interface) }}"
       vars:
         _network_interface:
-          vlans:
+          bridges:
             - device: "{{ test_iface_name }}"
-              link: "{{ test_vlan_link }}"
-              id: "{{ test_vlan_id }}"
-
+              interfaces:
+                - veth0
+              parameters:
+                aging-time: 100
+                priority: 1000
+                stp: false
+              addresses:
+                - 192.0.2.1/24
+                - 192.0.2.2/24
 
     - include_tasks: helpers/set_test_variables.yaml
-
-    # import_role instead of include_role
-    # to make role's variables available in this test
-    - import_role:
+      
+    - name: Test configuring static ipv4 with default gateway
+      import_role:
         name: network_interface
 
-    - name: debug pause after the role has run
-      include_tasks: helpers/debug_pause.yaml
-
     - include_tasks: helpers/flush_handlers.yaml
-      
-    - include_tasks: helpers/debug_pause.yaml
+
+    - name: debug pause after role has run
+      include_tasks: helpers/debug_pause.yaml
 
     - name: Start interface
       include_tasks: tasks/system_interface_control.yaml
       vars:
         interface: "{{ test_iface_name }}"
         state: up
-
+        
     - name: Stop interface
       include_tasks: tasks/system_interface_control.yaml
       vars:

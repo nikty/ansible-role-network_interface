@@ -5,7 +5,7 @@
         and _network_interface_implicit_loopback_added | default(False) %}
 auto {{ item.device }}
 {%   else %}
-{{ super() }}
+{{- super() -}}
 {%   endif %}
 {% endblock %}
 {% block interfaces %}
@@ -14,6 +14,6 @@ auto {{ item.device }}
 iface {{ item.device }} inet loopback
 {%   else %}
 iface {{ item.device }} inet loopback
-{{ super() }}
+{{ super() -}}
 {%   endif %}
 {% endblock %}

@@ -1,24 +1,26 @@
 {##jinja2: lstrip_blocks: True, trim_blocks: True#}
 # {{ ansible_managed }}
 
-{% if network_interface_single_configuration_file | default(False) %}
-{# {%   if network_interface_implicit_loopback and network_interface_loopback_name not in network_interface['loopbacks'] | map(attribute='device') %} #}
-{# {%     set _ = network_interface['loopbacks'].append( { 'device' : network_interface_loopback_name } ) %} #}
-{# {%   endif %} #}
+{% if network_interface_single_configuration_file | bool %}
 {%   for item in network_interface['loopbacks'] %}
 {%     include "ifupdown_interface_loopback.j2" %}
+{%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
-
 {%   for item in network_interface['ethernets'] %}
 {%     include "ifupdown_interface_ethernet.j2" %}
+{%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
-
-{%   for item in network_interface['vlans'] %}
-{%     include "ifupdown_interface_vlan.j2" %}
-{%   endfor %}
-
 {%   for item in network_interface['bonds'] %}
 {%     include "ifupdown_interface_bond.j2" %}
+{%     if loop.last %}{{ '\n' }}{% endif %}
+{%   endfor %}
+{%   for item in network_interface['vlans'] %}
+{%     include "ifupdown_interface_vlan.j2" %}
+{%     if loop.last %}{{ '\n' }}{% endif %}
+{%   endfor %}
+{%   for item in network_interface['bridges'] %}
+{%     include "ifupdown_interface_bond.j2" %}
+{%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
 {% else %}
 source {{ network_interface_ifupdown_net_path }}/*

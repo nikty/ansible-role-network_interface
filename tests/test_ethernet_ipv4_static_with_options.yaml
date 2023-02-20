@@ -13,9 +13,6 @@
   become: yes
   tasks:
 
-    - name: "Running test [004]"
-      debug: msg="[004]"
-
     - set_fact:
         network_interface: "{{ network_interface | combine(_network_interface) }}"
       vars:

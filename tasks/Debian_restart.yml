@@ -10,9 +10,9 @@
     sh /tmp/restart_interfaces.sh
   ignore_errors: yes
 
-- name: debug pause after restart script is executed
-  pause:
-  when: lookup('env', 'TEST_PAUSE') | bool
+# - name: debug pause after restart script is executed
+#   pause:
+#   when: lookup('env', 'TEST_PAUSE') | bool
 
 - name: Cleanup Network Restart script
   file:

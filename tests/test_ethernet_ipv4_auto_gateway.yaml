@@ -37,6 +37,8 @@
     
     - include_tasks: helpers/flush_handlers.yaml
 
+    - include_tasks: helpers/debug_pause.yaml
+
     - name: Compare templated file
       include_tasks: helpers/test_file_contents.yaml
       vars:

@@ -17,6 +17,8 @@
     - import_role:
         name: network_interface
 
+    - include_tasks: helpers/debug_pause.yaml
+
     - include_tasks: helpers/flush_handlers.yaml
       
     - include_tasks: helpers/test_file_contents.yaml

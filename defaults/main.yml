@@ -45,3 +45,5 @@ network_interface_configuration_backend: >-
 
 # Where possible, use single configuration file instead of many
 network_interface_single_configuration_file: false
+
+network_interface_ifupdown_separate_stanzas: true

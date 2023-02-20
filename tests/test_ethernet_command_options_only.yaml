@@ -26,11 +26,13 @@
         _network_interface:
           ethernets:
             - device: "{{ test_iface_name }}"
-              debian_command_options:
-                - "{{ test_option_1 }}"
-                - "{{ test_option_2 }}"
-                - "{{ test_option_3 }}"
-                - "{{ test_option_4 }}"
+              backend:
+                ifupdown:
+                  command_options:
+                    - "{{ test_option_1 }}"
+                    - "{{ test_option_2 }}"
+                    - "{{ test_option_3 }}"
+                    - "{{ test_option_4 }}"
 
 
     - include_tasks: helpers/set_test_variables.yaml

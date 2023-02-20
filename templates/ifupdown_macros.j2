@@ -1,5 +1,5 @@
 {% macro common_options() %}
-{%   for opt in item.debian_command_options | default([]) %}
+{%   for opt in item.backend.ifupdown.command_options | default([]) %}
 {%     if opt is mapping %}
 {%       if opt.comment is defined %}
     # {{ opt.comment }}
@@ -12,7 +12,7 @@
 {%   if item.mtu is defined %}
     mtu {{ item.mtu }}
 {%   endif %}
-{{ macro_macaddress() }}
+{{- macro_macaddress() -}}
 {% endmacro %}
 
 {% macro macro_macaddress() %}
@@ -21,54 +21,37 @@
 {%   endif %}
 {% endmacro %}
 
-{% macro def_iface(type, family, item) %}
-{%   if family == 'inet6' %}
-{%     if item.addresses is defined and item.addresses | ansible.utils.ipv6 %}
-{%       set method = 'static' %}
-{# {%     elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet6') #}
-{#             or (type == 'bond' and default_family == family ) #}
-{#             or (type == 'vlan' and item.link is defined and item.link is not none and item.id is defined and item.id is not none and default_family == family) %} #}
-{%     else %}
-{%       set method = 'manual' %}
-{%     endif %}
-{%   endif %}
-{%   if family == 'inet' %}
-{%     if item.addresses is defined and item.addresses | ansible.utils.ipv4 %}
-{%       set method = 'static' %}
-{%     elif item.dhcp4 is defined and item.dhcp4 %}
-{%       set method = 'dhcp' %}
-{# {%     elif (item.debian_command_options is defined and item.debian_command_options and default_family == 'inet') #}
-{#             or (type == 'bond' and default_family == family) #}
-{#             or (type == 'vlan' and item.link is defined and item.link is not none and item.id is defined and item.id is not none and default_family == family) %} #}
-{%     elif not (type == 'loopback' and _network_interface_implicit_loopback_added | default(False)) %}
-{%       set method = 'manual' %}
-{%     endif %}
-{%   endif %}
-{%   if method is defined %}
+{% macro interface_definition(family, method, type, item, default=False) %}
 iface {{ item.device }} {{ family }} {{ method }}
-{%     if family == 'inet' %}
-{%       include "ifupdown_ipv4_options.j2" %}
-{%     endif %}
-{%     if family == 'inet6' %}
-{%       include "ifupdown_ipv6_options.j2" %}
-{%     endif %}
-{%     if default_family == family %}
-{%       if type == 'vlan' and item.link is defined and item.id is defined and (item.device != "{}.{}".format(item.link, item.id)) %}
+{%   if family == 'inet' and method == 'static' %}
+{%     include "ifupdown_ipv4_options.j2" %}
+{%   endif %}
+{%   if family == 'inet6' and method == 'static' %}
+{%     include "ifupdown_ipv6_options.j2" %}
+{%   endif %}
+{%   if family == 'inet' and method == 'dhcp' %}
+{%     include "ifupdown_ipv4_dhcp.j2" %}
+{%   endif %}
+{%   if default %}
+{%     if type == 'vlan'
+          and item.link is defined and item.id is defined and (item.device != "{}.{}".format(item.link, item.id)) %}
     pre-up /bin/ip link add link {{ item.link }} name {{ item.device }} type vlan id {{ item.id }}
     up /bin/ip link set {{ item.link }} up
     down /bin/ip link del name {{ item.device }}
-{%       endif %}
-{{ common_options() }}
-{%       if type == 'bond' %}
-{%         include "ifupdown_bond_options.j2" %}
-{%       endif %}
-{%       if item.description | default("") %}
-{%         if type != 'bond' and type != 'loopback' %}
+{%     endif %}
+{{- common_options() -}}
+{%     if type == 'bond' %}
+{%       include "ifupdown_bond_options.j2" %}
+{%     endif %}
+{%     if type == 'bridge' %}
+{%       include "ifupdown_bridge_options.j2" %}
+{%     endif %}
+{%     if item.description | default("") %}
+{%       if type != 'bond' and type != 'loopback' %}
     description {{ item.description }}
-{%         else %}
+{%       else %}
     up /sbin/ip link set $IFACE alias "{{ item.description }}"
-{%         endif %}
 {%       endif %}
 {%     endif %}
-{%   endif %}
+{%   endif %}{# "end {% if default %} #}
 {% endmacro %}
