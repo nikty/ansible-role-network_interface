@@ -11,7 +11,7 @@
             - device: "{{ network_interface_loopback_name }}"
   when: >-
     network_interface_implicit_loopback | bool
-    and network_interface_loopback_name not in network_interface['loopbacks'] | map(attribute='device')
+    and network_interface_loopback_name not in network_interface['loopbacks'] | default([]) | map(attribute='device')
 
 
 - name: Update apt cache

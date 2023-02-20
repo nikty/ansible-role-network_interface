@@ -1,12 +1,12 @@
 - name: Register additional packages for bonds
   set_fact:
     network_interface_additional_packages: "{{ network_interface_additional_packages | default([]) + _network_interface_additional_packages['bond'][ ansible_os_family ] }}"
-  when: network_interface['bonds'] | length > 0
+  when: network_interface['bonds'] | default([])
 
 - name: Register additional packages for bridges
   set_fact:
     network_interface_additional_packages: "{{ network_interface_additional_packages | default([]) + _network_interface_additional_packages['bridge'][ ansible_os_family ] }}"
-  when: network_interface['bridges'] | length > 0
+  when: network_interface['bridges'] | default([])
   
 - name: Install additional packages
   package:

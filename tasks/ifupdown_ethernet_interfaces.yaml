@@ -3,7 +3,7 @@
   template:
     src: "ifupdown_interface_ethernet.j2"
     dest: "{{ network_interface_ifupdown_net_path }}/{{ network_interface_file_prefix }}{{ item.device }}{{ network_interface_file_postfix }}"
-  loop: "{{ network_interface['ethernets'] }}"
+  loop: "{{ network_interface['ethernets'] | default([]) }}"
   register: p
   notify: network_interface__handler_restart_networking
 

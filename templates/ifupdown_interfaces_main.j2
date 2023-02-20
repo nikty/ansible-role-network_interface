@@ -2,23 +2,23 @@
 # {{ ansible_managed }}
 
 {% if network_interface_single_configuration_file | bool %}
-{%   for item in network_interface['loopbacks'] %}
+{%   for item in network_interface['loopbacks'] | default([]) %}
 {%     include "ifupdown_interface_loopback.j2" %}
 {%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
-{%   for item in network_interface['ethernets'] %}
+{%   for item in network_interface['ethernets'] | default([]) %}
 {%     include "ifupdown_interface_ethernet.j2" %}
 {%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
-{%   for item in network_interface['bonds'] %}
+{%   for item in network_interface['bonds'] | default([]) %}
 {%     include "ifupdown_interface_bond.j2" %}
 {%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
-{%   for item in network_interface['vlans'] %}
+{%   for item in network_interface['vlans'] | default([]) %}
 {%     include "ifupdown_interface_vlan.j2" %}
 {%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
-{%   for item in network_interface['bridges'] %}
+{%   for item in network_interface['bridges'] | default([]) %}
 {%     include "ifupdown_interface_bond.j2" %}
 {%     if loop.last %}{{ '\n' }}{% endif %}
 {%   endfor %}
