@@ -56,7 +56,7 @@
     - p is changed
     - network_interface_single_configuration_file
 
-#- include_tasks: "ifupdown_remove_configuration.yaml"
+- include_tasks: "ifupdown_remove_configuration.yaml"
   
 # Template separate configuration files for interfaces
 - block:

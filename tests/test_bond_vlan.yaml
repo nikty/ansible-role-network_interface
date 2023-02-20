@@ -1,6 +1,4 @@
 ---
-- import_playbook: ../../shared/converge.yaml
-
 - hosts: all
   vars:
     test_bonding_1:

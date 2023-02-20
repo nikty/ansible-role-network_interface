@@ -1,46 +1,48 @@
-# - name: Get all device names
-#   set_fact:
-#     network_interface__managed_devices: "{{ network_interface__managed_devices | default([]) + [ item['device'] ] | unique }}"
-#   loop: >-
-#     {{ network_loopback_interfaces
-#        + network_ether_interfaces
-#        + network_bond_interfaces
-#        + network_vlan_interfaces
-#        + network_bridge_interfaces }}
-
 - name: Remove all includes in single configuration file mode
   block:
     - find:
         paths: "{{ network_interface_ifupdown_net_path }}"
-      register: files_to_remove
+      register: p
 
     - file:
         path: "{{ item.path }}"
         state: absent
-      loop: "{{ files_to_remove.files }}"
+      loop: "{{ p.files }}"
   when:
     - network_interface_single_configuration_file
 
+- name: Register managed interfaces
+  set_fact:
+    _network_interface_managed_interfaces: |-
+      {%- set lst = [] -%}
+      {%- for type in network_interface -%}
+      {%-   for interface in network_interface[type] -%}
+      {%-     set _ = lst.append(interface.device) -%}
+      {%-   endfor -%}
+      {%- endfor -%}
+      {{ lst }}
 
+- block:
+    
+    - name: Find interface config files to delete
+      find:
+        paths: "{{ network_interface_ifupdown_net_path }}"
+        excludes: >
+          {{ [ network_interface_file_prefix ]
+          | product(_network_interface_managed_interfaces)
+          | map('join', '')
+          | list
+          | product([ network_interface_file_postfix ])
+          | map('join', '')
+          | list if _network_interface_managed_interfaces | default([])
+          else [] }}
+      register: p
 
-# - name: Find interface config files to delete
-#   find:
-#     paths: "{{ network_interface_ifupdown_net_path }}"
-#     excludes: >
-#       {{ [ network_interface_file_prefix ]
-#          | product(network_interface__managed_devices)
-#          | map('join', '')
-#          | list
-#          | product([ network_interface_file_postfix ])
-#          | map('join', '')
-#          | list if network_interface__managed_devices | default([])
-#                 else [] }}
-#   register: config_files_to_delete
-
-# - name: Remove all interfaces config files not matching the pattern
-#   file:
-#     path: "{{ item.path }}"
-#     state: absent
-#   with_items: "{{ config_files_to_delete.files }}"
-#   register: network_interface_register_clean_interfaces
-#   notify: network_interface__handler_restart_networking
+    - name: Remove all interfaces config files not matching the pattern
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ p.files }}"
+  when: >-
+    not network_interface_single_configuration_file
+      

@@ -3,18 +3,25 @@
 
 {% endif %}
 {#
-## Decide where to put additional condiguration,
-## like "debian_command_options" or bonding options,
-## in case there are multiple IP families defined.
+# In case there are multiple interface stanzas, any additional options,
+# for example "bonding" options, are not duplicated in every stanza.
+# Instead, default family is selected, and options are set only in interface definition
+# with that family.
+#
+# Example: default family is 'inet'.
+#
+#       allow-hotplug eth1
+#
+#       iface eth1 inet static
+#            address 192.168.1.2/24
+#            gateway 192.168.1.1
+#            up /bin/true
+#            hwaddress 00:11:22:33:44:55
+#
+#       iface eth1 inet6 static
+#            address fec0:0:0:1::2/64
+#            gateway fec0:0:0:1::1
 #}
-{# {% if (item.addresses | default([]) | ansible.utils.ipv4) #}
-{#   or (item.dhcp4 is defined and item.dhcp4 ) %} #}
-{# {%   set default_family = 'inet' %} #}
-{# {% elif (item.addresses | default([]) | ansible.utils.ipv6 ) %} #}
-{# {%   set default_family = 'inet6' %} #}
-{# {% else %} #}
-{# {%   set default_family = 'inet' %} #}
-{# {% endif %} #}
 {% set default_family = None %}
 {% if (item.addresses | default([]) | ansible.utils.ipv4)
        or (item.dhcp4 is defined and item.dhcp4 ) %}
